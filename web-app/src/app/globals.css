@@ -1,26 +1,200 @@
+/* === Google Fonts === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Mina:wght@400;700&display=swap');  
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anonymous+Pro:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* === Tailwind === */
 @import "tailwindcss";
 
+/* === CSS Variables === */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* === Backgrounds & Neutrals === */
+
+  --color-bg: #0a0a0a; /* soft black */
+  --color-bg-soft: #f5f5f5; /* warm gray */
+  --color-bg-muted: #e5e7eb; /* light muted gray */
+  --color-surface: #ffffff;
+  --color-surface-dark: #1f2937; /* dark surface */
+
+  --color-black: #0a0a0a; /* deep black */
+  --color-off-black: #111111;
+  --color-nearly-black: #1c1c1c;
+
+  --color-white: #ffffff;
+  --color-off-white: #f8fafc;
+  --color-almost-white: #fefefe;
+
+  --color-border: #d1d5db; /* soft border */
+  --color-border-light: #e5e7eb;
+  --color-border-dark: #4b5563;
+
+  /* === Grays === */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-750: #2d3748; /* Custom gray for dark theme */
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* === Primary / Accent Colors === */
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
+
+  --indigo-500: #6366f1;
+  --purple-500: #8b5cf6;
+  --pink-500: #ec4899;
+  --rose-500: #f43f5e;
+
+  --red-500: #ef4444;
+  --orange-500: #f97316;
+  --amber-500: #f59e0b;
+  --yellow-500: #eab308;
+
+  --lime-500: #84cc16;
+  --green-500: #22c55e;
+  --emerald-500: #10b981;
+  --teal-500: #14b8a6;
+  --cyan-500: #06b6d4;
+
+  /* === Transparent Overlays === */
+  --overlay-light: rgba(255, 255, 255, 0.7);
+  --overlay-dark: rgba(0, 0, 0, 0.5);
+  --overlay-soft: rgba(0, 0, 0, 0.25);
+
+  /* === Typography Colors === */
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
+  --text-light: #9ca3af;
+  --text-on-dark: #f9fafb;
+
+  /* === Status Colors === */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* === Brands (Optional) === */
+  --facebook: #1877f2;
+  --twitter: #1da1f2;
+  --linkedin: #0a66c2;
+  --github: #333;
+  --discord: #5865f2;
+  --youtube: #ff0000;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* === Base Layer === */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Anonymous Pro', monospace;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  scroll-behavior: smooth;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  input, button, textarea, select {
+    font: inherit;
+    background: none;
+    border: none;
+    outline: none;
+  }
+
+  button {
+    cursor: pointer;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* === Component Layer === */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium text-white bg-blue-500 hover:bg-blue-600 transition;
+  }
+
+  .card {
+    @apply p-4 bg-white rounded-md shadow-md;
+  }
+
+  .container {
+    @apply mx-auto px-4 max-w-7xl;
+  }
+  .input-box{
+    @apply w-full text-sm bg-transparent border-[1.5px] px-5 py-3 rounded mb-4 ;
+  }
+  .btn-primary{
+    @apply w-full text-sm bg-blue-800 text-white rounded my-1 hover:bg-blue-500 h-8;
+  }
+  .fill {
+    font-family: 'Roboto', sans-serif;
+  }
+
+  /* Database Admin specific styles */
+  .bg-gray-750 {
+    background-color: #2d3748;
+  }
+  
+  .hover\:bg-gray-750:hover {
+    background-color: #2d3748;
+  }
+}
+
+@layer utilities {
+  @media (max-width: 380px) {
+    .custom-cols {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 381px) and (max-width: 760px) {
+    .custom-cols {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 761px) and (max-width: 1279px) {
+    .custom-cols {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .custom-cols {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
 }
