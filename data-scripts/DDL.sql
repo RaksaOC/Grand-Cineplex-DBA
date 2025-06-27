@@ -68,7 +68,29 @@ CREATE TABLE seats
     UNIQUE (theater_id, row_number, seat_number)
 );
 
--- Screenings table
+-- ========================================
+-- SCREENINGS TABLE (LARGE TABLE - CONSIDER PARTITIONING)
+-- ========================================
+
+-- For Railway hosting with 3M+ records, consider partitioning by date:
+-- CREATE TABLE screenings (
+--     id             SERIAL,
+--     movie_id       INTEGER       NOT NULL,
+--     theater_id     INTEGER       NOT NULL,
+--     screening_date DATE          NOT NULL,
+--     screening_time TIME          NOT NULL,
+--     price          DECIMAL(8, 2) NOT NULL,
+--     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     PRIMARY KEY (id, screening_date)
+-- ) PARTITION BY RANGE (screening_date);
+
+-- Example partitions:
+-- CREATE TABLE screenings_2024_01 PARTITION OF screenings
+--     FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');
+-- CREATE TABLE screenings_2024_02 PARTITION OF screenings
+--     FOR VALUES FROM ('2024-02-01') TO ('2024-03-01');
+
 CREATE TABLE screenings
 (
     id             SERIAL PRIMARY KEY,
@@ -175,23 +197,46 @@ CREATE INDEX idx_customers_phone ON customers (phone);
 -- Screenings
 CREATE INDEX idx_screenings_movie_date ON screenings (movie_id, screening_date);
 CREATE INDEX idx_screenings_theater_date ON screenings (theater_id, screening_date);
+-- Additional indexes for common screening queries
+CREATE INDEX idx_screenings_date_time ON screenings (screening_date, screening_time);
+CREATE INDEX idx_screenings_theater_movie ON screenings (theater_id, movie_id);
+CREATE INDEX idx_screenings_price ON screenings (price);
 
 -- Bookings
 CREATE INDEX idx_bookings_customer ON bookings (customer_id);
 CREATE INDEX idx_bookings_screening ON bookings (screening_id);
 CREATE INDEX idx_bookings_date ON bookings (created_at);
+-- Additional indexes for booking management
+CREATE INDEX idx_bookings_status ON bookings (status);
+CREATE INDEX idx_bookings_staff ON bookings (created_by_staff_id);
+CREATE INDEX idx_bookings_customer_date ON bookings (customer_id, created_at);
 
 -- Tickets
 CREATE INDEX idx_tickets_booking ON tickets (booking_id);
 CREATE INDEX idx_tickets_seat ON tickets (seat_id);
+-- Additional index for seat availability queries
+CREATE INDEX idx_tickets_seat_booking ON tickets (seat_id, booking_id);
 
 -- Payments
 CREATE INDEX idx_payments_booking ON payments (booking_id);
 CREATE INDEX idx_payments_status ON payments (status);
+-- Additional indexes for payment analytics
+CREATE INDEX idx_payments_method ON payments (method);
+CREATE INDEX idx_payments_amount ON payments (amount);
+CREATE INDEX idx_payments_created ON payments (created_at);
 
 -- Theaters
 CREATE INDEX idx_theaters_cinema ON theaters(cinema_id);
 CREATE INDEX idx_cinemas_location ON cinemas(city, state, country);
+
+-- Movies
+CREATE INDEX idx_movies_genre ON movies (genre);
+CREATE INDEX idx_movies_release_date ON movies (release_date);
+CREATE INDEX idx_movies_rating ON movies (rating);
+
+-- Seats
+CREATE INDEX idx_seats_theater_type ON seats (theater_id, seat_type);
+CREATE INDEX idx_seats_theater_row ON seats (theater_id, row_number);
 
 -- ========================================
 -- CONSTRAINTS AND TRIGGERS
