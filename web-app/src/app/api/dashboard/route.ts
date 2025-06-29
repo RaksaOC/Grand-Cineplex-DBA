@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/app/utils/db";
 import { tables } from "@/app/utils/tables";
+
 interface DashboardData {
     numOfUsers: number;
     roles: number;
@@ -16,7 +17,6 @@ interface DashboardData {
 }
 
 export const GET = async (req: NextRequest) => {
-
     const data: DashboardData = {
         numOfUsers: 0,
         roles: 0,
