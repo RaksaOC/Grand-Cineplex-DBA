@@ -1,18 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu, User } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import Dashboard from '@/components/Dashboard';
-import UsersManagement from '@/components/UsersManagement';
+import UsersManagement from '@/components/Users';
 import RolesManagement from '@/components/RolesManagement';
 import Schema from '@/components/Schema';
 import Backup from '@/components/Backup';
 import InfoSection from '@/components/Info';
+import { DashboardData } from './types/DashboardData';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState('dashboard');
+  
 
   const handleSectionChange = (section: string) => {
     setCurrentSection(section);

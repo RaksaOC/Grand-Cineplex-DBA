@@ -1,41 +1,126 @@
 'use client';
 
-import { Users, Shield, Database, DatabaseBackup } from 'lucide-react';
+import { DashboardData } from '@/app/types/DashboardData';
+import { Users, Shield, Database, DatabaseBackup, Table, View, CloudLightning, Cog } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function Dashboard() {
+    const [isLoading, setIsLoading] = useState(true);
+    const [dashboardData, setDashboardData] = useState<DashboardData>({
+        numOfUsers: 0,
+        numOfRoles: 0,
+        databaseSize: 0,
+        totalBackups: 0,
+        numOfTables: 0,
+        numOfViews: 0,
+        numOfIndexes: 0,
+        numOfTriggers: 0,
+        recentActivities: [],
+    });
+
     const stats = [
         {
-            title: 'Total Users',
-            value: '1,247',
-            icon: Users,
-            color: ''
+            title: 'Users',
+            value: dashboardData.numOfUsers,
+            icon: <Users className='text-white' />,
         },
         {
-            title: 'Active Roles',
-            value: '8',
-            icon: Shield,
-            color: ''
+            title: 'Roles',
+            value: dashboardData.numOfRoles,
+            icon: <Shield className='text-white' />,
         },
         {
             title: 'Database Size',
-            value: '2.4 GB',
-            icon: Database,
-            color: ''
+            value: dashboardData.databaseSize,
+            icon: <Database className='text-white' />,
         },
         {
             title: 'Total Backups',
-            value: '1',
-            icon: DatabaseBackup,
-            color: ''
+            value: dashboardData.totalBackups,
+            icon: <DatabaseBackup className='text-white' />,
+        },
+        {
+            title: 'Tables',
+            value: dashboardData.numOfTables,
+            icon: <Table className='text-white' />,
+        },
+        {
+            title: 'Views',
+            value: dashboardData.numOfViews,
+            icon: <View className='text-white' />,
+        },
+        {
+            title: 'Indexes',
+            value: dashboardData.numOfIndexes,
+            icon: <CloudLightning className='text-white' />,
+        },
+        {
+            title: 'Triggers',
+            value: dashboardData.numOfTriggers,
+            icon: <Cog className='text-white' />,
         }
-    ];
+    ]
 
-    const recentActivity = [
-        { action: 'New user created', user: 'john.doe@cineplex.com', time: '2 minutes ago', type: 'success' },
-        { action: 'Role permissions updated', user: 'admin@cineplex.com', time: '5 minutes ago', type: 'info' },
-        { action: 'Database backup completed', user: 'system', time: '1 hour ago', type: 'success' },
-        { action: 'Failed login attempt', user: 'unknown@cineplex.com', time: '2 hours ago', type: 'warning' },
-    ];
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const response = await fetch('/api/dashboard');
+                const data = await response.json();
+                setDashboardData(data);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchDashboardData();
+    }, []);
+
+    if (isLoading) {
+        return (
+            <div className="space-y-6 animate-pulse">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <div className="h-8 w-32 bg-slate-700 rounded"></div>
+                        <div className="h-4 w-48 bg-slate-700 rounded mt-1"></div>
+                    </div>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[...Array(8)].map((_, index) => (
+                        <div key={index} className="bg-black border border-slate-700 rounded-xl p-6">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-2">
+                                    <div className="h-4 w-20 bg-slate-700 rounded"></div>
+                                    <div className="h-6 w-16 bg-slate-700 rounded"></div>
+                                </div>
+                                <div className="w-12 h-12 rounded-lg bg-slate-700"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Recent Activity */}
+                <div className="bg-black border border-slate-700 rounded-xl">
+                    <div className="p-6 border-b border-slate-700">
+                        <div className="h-6 w-32 bg-slate-700 rounded"></div>
+                    </div>
+                    <div className="p-6">
+                        <div className="space-y-4">
+                            {[...Array(5)].map((_, index) => (
+                                <div key={index} className="flex space-x-4">
+                                    <div className="h-4 w-24 bg-slate-700 rounded"></div>
+                                    <div className="h-4 w-32 bg-slate-700 rounded"></div>
+                                    <div className="h-4 w-20 bg-slate-700 rounded"></div>
+                                    <div className="h-4 w-40 bg-slate-700 rounded"></div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -50,7 +135,6 @@ export default function Dashboard() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, index) => {
-                    const Icon = stat.icon;
                     return (
                         <div key={index} className="bg-black border border-slate-700 rounded-xl p-6 hover:border-slate-600 transition-colors">
                             <div className="flex items-center justify-between">
@@ -59,7 +143,7 @@ export default function Dashboard() {
                                     <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
                                 </div>
                                 <div className={`w-12 h-12 rounded-lg bg-sky-500/20 border border-sky-500/30 flex items-center justify-center`}>
-                                    <Icon className="w-6 h-6 text-white" />
+                                    {stat.icon}
                                 </div>
                             </div>
                         </div>
@@ -73,23 +157,28 @@ export default function Dashboard() {
                     <h2 className="text-xl font-bold text-white">Recent Activity</h2>
                 </div>
                 <div className="p-6">
-                    <div className="space-y-4">
-                        {recentActivity.map((activity, index) => (
-                            <div key={index} className="flex items-center space-x-4 p-4 bg-black border border-slate-700 rounded-lg hover:border-slate-600 transition-colors">
-                                <div className={`w-3 h-3 rounded-full ${activity.type === 'success' ? 'bg-sky-400' :
-                                    activity.type === 'warning' ? 'bg-yellow-400' :
-                                        'bg-sky-400'
-                                    }`}></div>
-                                <div className="flex-1">
-                                    <p className="text-white font-medium">{activity.action}</p>
-                                    <p className="text-slate-400 text-sm">{activity.user}</p>
-                                </div>
-                                <span className="text-slate-500 text-sm">{activity.time}</span>
-                            </div>
-                        ))}
-                    </div>
+                    <table className="w-full">
+                        <thead>
+                            <tr className="text-left border-b border-slate-700">
+                                <th className="pb-3 text-white font-bold">Username</th>
+                                <th className="pb-3 text-white font-bold">IP Address</th>
+                                <th className="pb-3 text-white font-bold">Status</th>
+                                <th className="pb-3 text-white font-bold">Start Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {dashboardData.recentActivities.map((activity, index) => (
+                                <tr key={index} className="border-b border-slate-700 hover:bg-slate-900/50 transition-colors">
+                                    <td className="py-4 text-white">{activity.usename}</td>
+                                    <td className="py-4 text-slate-400">{activity.ip}</td>
+                                    <td className="py-4 text-slate-400">{activity.status}</td>
+                                    <td className="py-4 text-slate-400">{activity.backend_start.toLocaleString()}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     );
-} 
+}

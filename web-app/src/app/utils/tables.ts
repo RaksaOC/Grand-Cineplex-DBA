@@ -28,6 +28,7 @@ export const tables = {
       pg_tables: "pg_catalog.pg_tables", // basic table info
       pg_indexes: "pg_catalog.pg_indexes",
       pg_views: "pg_catalog.pg_views",
+      pg_trigger: "pg_catalog.pg_trigger",
     },
   
     optional: {
