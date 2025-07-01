@@ -3,25 +3,36 @@
 import { useEffect, useState } from 'react';
 import { Plus, Search, Edit, Trash2, Eye, Filter, Check, X } from 'lucide-react';
 import { User } from '@/app/types/Users';
+import { AddUser } from './modals/AddUser';
+import axios from 'axios';
 
 export default function Users() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState('all');
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-
+    const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('/api/users');
-                const data = await response.json();
-                setUsers(data);
+                const response = await axios.get('/api/users');
+                setUsers(response.data);
             } finally {
                 setIsLoading(false);
             }
         };
         fetchUsers();
     }, []);
+
+    const handleAddUser = async (username: string, password: string) => {
+        try {
+            const response = await axios.post('/api/users', { username, password });
+            setUsers([...users, response.data]);
+            setIsAddUserModalOpen(false);
+        } catch (error) {
+            console.error('Failed to add user:', error);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -82,7 +93,7 @@ export default function Users() {
                     <h1 className="text-2xl font-bold text-white">Database Users</h1>
                     <p className="text-slate-400 mt-1">Manage user accounts and permissions</p>
                 </div>
-                <button className="bg-sky-500/20  border border-sky-500/30 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2">
+                <button onClick={() => setIsAddUserModalOpen(true)} className="bg-sky-500/20  border border-sky-500/30 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2">
                     <Plus className="w-5 h-5" />
                     <span>Add User</span>
                 </button>
@@ -145,7 +156,7 @@ export default function Users() {
                                     <td className="px-6 py-4">
                                         {user.isCreateDB ? (<Check className="w-4 h-4 text-green-500" />) : (<X className="w-4 h-4 text-red-500" />)}
                                     </td>
-                                    
+
                                     <td className="px-6 py-4">
                                         {user.byPassRLS ? (<Check className="w-4 h-4 text-green-500" />) : (<X className="w-4 h-4 text-red-500" />)}
                                     </td>
@@ -174,6 +185,7 @@ export default function Users() {
                     </table>
                 </div>
             </div>
+            <AddUser isOpen={isAddUserModalOpen} onClose={() => setIsAddUserModalOpen(false)} onSubmit={handleAddUser} />
         </div>
     );
 } 

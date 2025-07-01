@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { tables } from "@/app/utils/tables";
 import pool from "@/app/utils/db";
 
@@ -26,10 +26,28 @@ export const GET = async () => {
       })
     );
     return NextResponse.json(data);
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.message);
     return NextResponse.json(
       { error: "Failed to fetch users" },
+      { status: 500 }
+    );
+  } finally {
+    client.release();
+  }
+};
+
+export const POST = async (request: NextRequest) => {
+  const client = await pool.connect();
+  const body = await request.json();
+  const { username, password } = body;
+  try {
+    await client.query(`CREATE USER ${username} WITH PASSWORD '${password}'`);
+    return NextResponse.json({ message: "User created successfully" });
+  } catch (error: any) {
+    console.error(error.message);
+    return NextResponse.json(
+      { error: "Failed to create user" },
       { status: 500 }
     );
   } finally {

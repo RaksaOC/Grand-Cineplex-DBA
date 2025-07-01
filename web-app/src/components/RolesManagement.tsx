@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { Plus, Edit, Trash2, Check } from 'lucide-react';
+import { AddRole } from './modals/AddRole';
+import axios from 'axios';
 
 export default function RolesManagement() {
     const [selectedRole, setSelectedRole] = useState('admin');
-
+    const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
     const roles = [
         {
             id: 'admin',
@@ -50,6 +52,16 @@ export default function RolesManagement() {
 
     const currentRole = roles.find(role => role.id === selectedRole);
 
+    const handleAddRole = async (roleName: string, privileges: string[], tables: string[]) => {
+        console.log(roleName, privileges, tables);
+        // try {
+        //     const response = await axios.post('/api/roles', { roleName, privileges, tables });
+        //     console.log(response.data);
+        // } catch (error) {
+        //     console.error('Failed to add role:', error);
+        // }
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -58,7 +70,7 @@ export default function RolesManagement() {
                     <h1 className="text-2xl font-bold text-white">Roles & Permissions</h1>
                     <p className="text-slate-400 mt-1">Manage user roles and access permissions</p>
                 </div>
-                <button className="bg-sky-500/20  border border-sky-500/30 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2">
+                <button onClick={() => setIsAddRoleModalOpen(true)} className="bg-sky-500/20  border border-sky-500/30 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2">
                     <Plus className="w-5 h-5" />
                     <span>Create Role</span>
                 </button>
@@ -148,6 +160,7 @@ export default function RolesManagement() {
                     )}
                 </div>
             </div>
+            <AddRole isOpen={isAddRoleModalOpen} onClose={() => setIsAddRoleModalOpen(false)} onSubmit={handleAddRole} />
         </div>
     );
 } 

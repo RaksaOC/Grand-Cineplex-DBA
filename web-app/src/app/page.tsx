@@ -8,13 +8,12 @@ import UsersManagement from '@/components/Users';
 import RolesManagement from '@/components/RolesManagement';
 import Schema from '@/components/Schema';
 import Backup from '@/components/Backup';
-import InfoSection from '@/components/Info';
-import { DashboardData } from './types/DashboardData';
+import Console from '@/components/Console';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState('dashboard');
-  
+
 
   const handleSectionChange = (section: string) => {
     setCurrentSection(section);
@@ -33,8 +32,8 @@ export default function App() {
         return <Schema />;
       case 'backup':
         return <Backup />;
-      case 'info':
-        return <InfoSection />;
+      case 'console':
+        return <Console />;
       default:
         return <Dashboard />;
     }

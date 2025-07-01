@@ -9,7 +9,8 @@ import {
     X,
     DatabaseBackup,
     ChartColumnStacked,
-    Info
+    Info,
+    Terminal
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -27,7 +28,7 @@ export default function Sidebar({ isOpen, onToggle, onSectionChange }: SidebarPr
         { id: 'roles', label: 'Roles & Permissions', icon: Shield },
         { id: 'backup', label: 'Backup Database', icon: DatabaseBackup },
         { id: 'schemas', label: 'Database Schema', icon: ChartColumnStacked },
-        { id: 'info', label: 'Database Information', icon: Info }
+        { id: 'console', label: 'Console', icon: Terminal }
     ];
 
     const handleSectionClick = (sectionId: string) => {
@@ -48,7 +49,7 @@ export default function Sidebar({ isOpen, onToggle, onSectionChange }: SidebarPr
             {/* Sidebar */}
             <div className={`
         fixed top-0 left-0 h-full w-72  bg-black border-r border-slate-700 
-        transform transition-transform duration-300 ease-in-out z-50
+        transform transition-transform duration-300 ease-in-out z-50 overflow-y-scroll scrollbar-hide
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
                 {/* Header */}
