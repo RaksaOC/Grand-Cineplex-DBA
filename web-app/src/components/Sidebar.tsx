@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Users,
     Shield,
@@ -20,7 +20,14 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onToggle, onSectionChange }: SidebarProps) {
-    const [activeSection, setActiveSection] = useState('dashboard');
+    const [activeSection, setActiveSection] = useState('');
+
+    useEffect(() => {
+        const section = localStorage.getItem('activeSection');
+        if (section) {
+            setActiveSection(section);
+        }
+    }, []);
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
@@ -78,7 +85,10 @@ export default function Sidebar({ isOpen, onToggle, onSectionChange }: SidebarPr
                         return (
                             <button
                                 key={item.id}
-                                onClick={() => handleSectionClick(item.id)}
+                                onClick={() => {
+                                    handleSectionClick(item.id);
+                                    localStorage.setItem('activeSection', item.id);
+                                }}
                                 className={`
                   w-full flex items-center space-x-3 px-4 py-6 rounded-lg
                   transition-all duration-200 text-left

@@ -14,6 +14,13 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState('dashboard');
 
+  useEffect(() => {
+    const section = localStorage.getItem('activeSection');
+    if (section) {
+      setCurrentSection(section);
+    }
+  }, []);
+
 
   const handleSectionChange = (section: string) => {
     setCurrentSection(section);

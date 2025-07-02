@@ -45,21 +45,39 @@ export default function Schema() {
     if (isLoading) {
         return (
             <div className="space-y-6">
+                {/* Header */}
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Database Schema</h1>
-                    <p className="text-slate-400 mt-1">Monitor and manage database schema</p>
+                    <div className="h-8 w-48 bg-slate-700 rounded"></div>
+                    <div className="h-5 w-64 bg-slate-700/50 rounded mt-1"></div>
                 </div>
-                <div className="space-y-4 animate-pulse">
+
+                {/* Schema Overview */}
+                <div className="flex items-center space-x-3 mb-4">
+                    <div className="h-6 w-6 bg-slate-700 rounded"></div>
+                    <div className="h-7 w-40 bg-slate-700 rounded"></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {[...Array(3)].map((_, i) => (
+                        <div key={i} className="bg-black border border-slate-600 rounded-lg p-4">
+                            <div className="h-8 bg-slate-700 rounded w-16"></div>
+                            <div className="h-4 bg-slate-700/50 rounded w-24 mt-2"></div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className='w-full h-0.5 bg-slate-700'></div>
+
+                {/* Tables */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                    {[...Array(6)].map((_, i) => (
                         <div key={i} className="bg-black border border-slate-700 rounded-xl p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="h-6 w-32 bg-slate-700 rounded"></div>
-                                <div className="h-6 w-20 bg-slate-700 rounded"></div>
-                            </div>
-                            <div className="space-y-2">
-                                {[...Array(4)].map((_, j) => (
-                                    <div key={j} className="h-4 bg-slate-700 rounded w-full"></div>
-                                ))}
+                            <div className="flex items-center space-x-3">
+                                <div className="h-5 w-5 bg-slate-700 rounded"></div>
+                                <div className="h-5 w-5 bg-slate-700 rounded"></div>
+                                <div>
+                                    <div className="h-6 w-32 bg-slate-700 rounded"></div>
+                                    <div className="h-4 w-24 bg-slate-700/50 rounded mt-2"></div>
+                                </div>
                             </div>
                         </div>
                     ))}
