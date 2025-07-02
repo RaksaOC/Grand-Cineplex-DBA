@@ -5,6 +5,7 @@ import { Plus, Search, Edit, Trash2, Eye, Filter, Check, X } from 'lucide-react'
 import { User } from '@/app/types/Users';
 import { AddUser } from './modals/AddUser';
 import axios from 'axios';
+import DeleteConfirm from './modals/DeleteConfirm';
 
 export default function Users() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -12,6 +13,18 @@ export default function Users() {
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+    const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
+
+    const handleDeleteUser = async (username: string) => {
+        try {
+            // await axios.delete(`/api/users/${username}`);
+            // setUsers(users.filter((user: User) => user.username !== username));
+            setIsDeleteUserModalOpen(false);
+        } catch (error) {
+            console.error('Failed to delete user:', error);
+        }
+    };
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -169,12 +182,9 @@ export default function Users() {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center justify-end space-x-2">
                                             <button className="p-2 text-slate-400 hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-colors">
-                                                <Eye className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-2 text-slate-400 hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-colors">
                                                 <Edit className="w-4 h-4" />
                                             </button>
-                                            <button className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                                            <button className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" onClick={() => setIsDeleteUserModalOpen(true)}>
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
@@ -184,8 +194,9 @@ export default function Users() {
                         </tbody>
                     </table>
                 </div>
+                <DeleteConfirm isOpen={isDeleteUserModalOpen} onClose={() => setIsDeleteUserModalOpen(false)} onConfirm={() => handleDeleteUser("")} title="Delete User" message="Are you sure you want to delete this user?" />
             </div>
-            <AddUser isOpen={isAddUserModalOpen} onClose={() => setIsAddUserModalOpen(false)} onSubmit={handleAddUser} />
+            <AddUser isOpen={isAddUserModalOpen} onClose={() => setIsAddUserModalOpen(false)} onSubmit={handleAddUser} roles={[]} />
         </div>
     );
 } 

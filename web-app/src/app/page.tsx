@@ -5,7 +5,7 @@ import { Menu, User } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import Dashboard from '@/components/Dashboard';
 import UsersManagement from '@/components/Users';
-import RolesManagement from '@/components/RolesManagement';
+import RolesManagement from '@/components/Roles';
 import Schema from '@/components/Schema';
 import Backup from '@/components/Backup';
 import Console from '@/components/Console';

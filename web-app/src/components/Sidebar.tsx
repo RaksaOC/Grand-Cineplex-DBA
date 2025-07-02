@@ -25,7 +25,7 @@ export default function Sidebar({ isOpen, onToggle, onSectionChange }: SidebarPr
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
         { id: 'users', label: 'Database Users', icon: Users },
-        { id: 'roles', label: 'Roles & Permissions', icon: Shield },
+        { id: 'roles', label: 'Roles & Privileges', icon: Shield },
         { id: 'backup', label: 'Backup Database', icon: DatabaseBackup },
         { id: 'schemas', label: 'Database Schema', icon: ChartColumnStacked },
         { id: 'console', label: 'Console', icon: Terminal }
