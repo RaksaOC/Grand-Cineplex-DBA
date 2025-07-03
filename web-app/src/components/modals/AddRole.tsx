@@ -41,16 +41,14 @@ export const AddRole = ({ isOpen, onClose, onSuccess }: AddRoleProps) => {
                 const response = await axios.get('/api/tables');
                 setTables(response.data);
                 const newData = (response.data.map((table: string) => {
-                    console.log("table", table);
                     return {
                         name: table,
                         privileges: []
                     }
                 }));
-                console.log("newData", newData);
-                console.log("newData.flat()", newData.flat());
 
                 setData(newData);
+                setSelectedTable([newData[0].name]);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Failed to fetch tables:', error);
@@ -59,7 +57,7 @@ export const AddRole = ({ isOpen, onClose, onSuccess }: AddRoleProps) => {
         }
         fetchPrivileges();
         fetchTables();
-    }, []);
+    }, [isOpen]);
 
     const clearData = () => {
         setData(data.map((item) => {
@@ -267,7 +265,6 @@ export const AddRole = ({ isOpen, onClose, onSuccess }: AddRoleProps) => {
                                             ))}
                                         </div>
                                     </div>
-                                    <div className='w-full h-0.5 bg-slate-700'></div>
 
 
 
