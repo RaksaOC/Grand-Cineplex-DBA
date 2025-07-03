@@ -37,15 +37,7 @@ export default function Users() {
         fetchUsers();
     }, []);
 
-    const handleAddUser = async (username: string, password: string) => {
-        try {
-            const response = await axios.post('/api/users', { username, password });
-            setUsers([...users, response.data]);
-            setIsAddUserModalOpen(false);
-        } catch (error) {
-            console.error('Failed to add user:', error);
-        }
-    };
+
 
     if (isLoading) {
         return (
@@ -196,7 +188,7 @@ export default function Users() {
                 </div>
                 <DeleteConfirm isOpen={isDeleteUserModalOpen} onClose={() => setIsDeleteUserModalOpen(false)} onConfirm={() => handleDeleteUser("")} title="Delete User" message="Are you sure you want to delete this user?" />
             </div>
-            <AddUser isOpen={isAddUserModalOpen} onClose={() => setIsAddUserModalOpen(false)} onSubmit={handleAddUser} roles={[]} />
+            <AddUser isOpen={isAddUserModalOpen} onClose={() => setIsAddUserModalOpen(false)} />
         </div>
     );
 } 

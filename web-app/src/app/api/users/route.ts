@@ -6,7 +6,7 @@ export const GET = async () => {
   const client = await pool.connect();
   try {
     const users = await client.query(
-      `SELECT usename, usesuper, usecreatedb, userepl, usebypassrls, valuntil FROM ${tables.roles.pg_user}`
+      `SELECT usename, usesuper, usecreatedb, userepl, usebypassrls, valuntil FROM ${tables.roles.pg_user} WHERE passwd IS NOT NULL`
     );
     const data = users.rows.map(
       (user: {
@@ -40,9 +40,10 @@ export const GET = async () => {
 export const POST = async (request: NextRequest) => {
   const client = await pool.connect();
   const body = await request.json();
-  const { username, password } = body;
+  const { username, password, role } = body;
   try {
     await client.query(`CREATE USER ${username} WITH PASSWORD '${password}'`);
+    await client.query(`GRANT ${role} TO ${username}`);
     return NextResponse.json({ message: "User created successfully" });
   } catch (error: any) {
     console.error(error.message);

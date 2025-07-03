@@ -10,15 +10,16 @@ export const GET = async (request: NextRequest) => {
 
     // Get all non-system roles
     const roles = await client.query(
-      `SELECT rolname FROM ${tables.roles.pg_roles} WHERE rolname NOT LIKE 'pg_%'`
+      `SELECT rolname, rolpassword FROM ${tables.roles.pg_authid} WHERE rolname NOT LIKE 'pg_%' AND rolpassword IS NULL`
     );
 
     // Get all privileges
     const privileges = await client.query(
       `SELECT grantee, table_name, privilege_type 
        FROM ${tables.privileges.role_table_grants} 
-       WHERE table_schema != 'information_schema' 
-       AND table_schema != 'pg_catalog' 
+       WHERE table_schema != 'information_schema'
+       AND table_schema != 'pg_catalog'
+       AND grantee != 'postgres'
        ORDER BY grantee, table_schema, table_name;`
     );
 
@@ -63,6 +64,54 @@ export const GET = async (request: NextRequest) => {
     console.error("Error fetching roles:", error);
     return NextResponse.json(
       { error: "Failed to fetch roles" },
+      { status: 500 }
+    );
+  } finally {
+    client.release();
+  }
+};
+
+export const POST = async (request: NextRequest) => {
+  const client = await pool.connect();
+  try {
+    const { role, tables, privileges } = await request.json();
+    await client.query(`CREATE ROLE ${role}`);
+    for (const privilege of privileges) {
+      for (const table of tables) {
+        await client.query(`GRANT ${privilege} ON TABLE ${table} TO ${role}`);
+      }
+    }
+    return NextResponse.json({ message: "Role created successfully" });
+  } catch (error) {
+    console.error("Error creating role:", error);
+    return NextResponse.json(
+      { error: "Failed to create role" },
+      { status: 500 }
+    );
+  } finally {
+    client.release();
+  }
+};
+
+export const PATCH = async (request: NextRequest) => {
+  const client = await pool.connect();
+  try {
+    const { role, tables, privileges } = await request.json();
+    // revoke all privileges on all tables
+    for (const table of tables) {
+      await client.query(`REVOKE ALL ON TABLE ${table} FROM ${role}`);
+    }
+    // grant new privileges
+    for (const privilege of privileges) {
+      for (const table of tables) {
+        await client.query(`GRANT ${privilege} ON TABLE ${table} TO ${role}`);
+      }
+    }
+    return NextResponse.json({ message: "Role updated successfully" });
+  } catch (error) {
+    console.error("Error updating role:", error);
+    return NextResponse.json(
+      { error: "Failed to update role" },
       { status: 500 }
     );
   } finally {

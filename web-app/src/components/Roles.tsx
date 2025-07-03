@@ -12,6 +12,7 @@ import EditTable from './EditTable';
 import EditPrivileges from './EditPrivileges';
 
 export default function RolesManagement() {
+    const [refresh, setRefresh] = useState(false);
     const [roles, setRoles] = useState<RolesData[]>([]);
     const [selectedRole, setSelectedRole] = useState<string>('');
     const [selectedTable, setSelectedTable] = useState<TablePrivileges | null>(null);
@@ -66,19 +67,11 @@ export default function RolesManagement() {
             }
         };
         fetchRoles();
-    }, []);
+    }, [refresh]);
 
     // const currentRole = roles.find(role => role.id === selectedRole);
 
-    const handleAddRole = async (roleName: string, privileges: string[], tables: string[]) => {
-        console.log(roleName, privileges, tables);
-        // try {
-        //     const response = await axios.post('/api/roles', { roleName, privileges, tables });
-        //     console.log(response.data);
-        // } catch (error) {
-        //     console.error('Failed to add role:', error);
-        // }
-    };
+
 
     if (isLoading) {
         return (
@@ -329,7 +322,7 @@ export default function RolesManagement() {
                     )}
                 </div>
             </div>
-            <AddRole isOpen={isAddRoleModalOpen} onClose={() => setIsAddRoleModalOpen(false)} onSubmit={handleAddRole} />
+            <AddRole isOpen={isAddRoleModalOpen} onClose={() => setIsAddRoleModalOpen(false)} />
             <EditRole isOpen={isEditRoleModalOpen} onClose={() => setIsEditRoleModalOpen(false)} onSubmit={handleEditRole} currentRole={{ id: selectedRole, name: selectedRole }} />
             <DeleteConfirm isOpen={isDeleteRoleModalOpen} onClose={() => setIsDeleteRoleModalOpen(false)} onConfirm={handleDeleteRole} title="Delete Role" message="Are you sure you want to delete this role?" />
         </div >

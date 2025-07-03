@@ -10,10 +10,9 @@ import { getPrivDescription } from '@/app/utils/getInfo';
 interface AddRoleProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (roleName: string, privileges: string[], tables: string[]) => void;
 }
 
-export const AddRole = ({ isOpen, onClose, onSubmit }: AddRoleProps) => {
+export const AddRole = ({ isOpen, onClose }: AddRoleProps) => {
     const [roleName, setRoleName] = useState('');
     const [selectedPrivileges, setSelectedPrivileges] = useState<string[]>([]);
     const [selectedTables, setSelectedTables] = useState<string[]>([]);
@@ -65,10 +64,7 @@ export const AddRole = ({ isOpen, onClose, onSubmit }: AddRoleProps) => {
 
         setIsLoading(true);
         try {
-            await onSubmit(roleName.trim(), selectedPrivileges, selectedTables);
-            setRoleName('');
-            setSelectedPrivileges([]);
-            setSelectedTables([]);
+            await axios.post('/api/roles', { role: roleName.trim(), tables: selectedTables, privileges: selectedPrivileges });
             onClose();
         } catch (error) {
             console.error('Failed to add role:', error);
