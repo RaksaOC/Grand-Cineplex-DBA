@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# ✅ SET THIS TO YOUR Railway Postgres URL
+DATABASE_URL="your_database_url"
+
+echo "🔗 Connecting to $DATABASE_URL"
+
+# Foreign-key-safe insert order
+TABLES=(
+  cinemas
+  theaters
+  movies
+  customers
+  staff
+  screenings
+  bookings
+  seats
+  tickets
+  payments
+)
+
+for TABLE in "${TABLES[@]}"; do
+  FILE="${TABLE}.csv"
+  echo "📤 Importing $FILE into $TABLE..."
+
+  if [ -f "$FILE" ]; then
+    psql "$DATABASE_URL" -c "\copy $TABLE FROM '$FILE' DELIMITER ',' CSV HEADER"
+  else
+    echo "⚠️  File $FILE not found, skipping $TABLE."
+  fi
+done
+
+echo "✅ Done importing all tables!"
