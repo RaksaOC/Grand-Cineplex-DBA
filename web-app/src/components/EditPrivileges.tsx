@@ -1,5 +1,5 @@
-import { TablePrivileges } from "@/app/types/RolesData";
-import { getPrivDescription } from "@/app/utils/getInfo";
+import { TablePrivileges } from "@/types/RolesData";
+import { getPrivDescription } from "@/utils/getInfo";
 import { Check, Save } from "lucide-react";
 import { useState } from "react";
 

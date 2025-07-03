@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/app/utils/db";
-import { tables } from "@/app/utils/tables";
+import pool from "@/utils/db";
+import { tables } from "@/utils/tables";
 
 export const GET = async (request: NextRequest) => {
   const client = await pool.connect();
@@ -11,7 +11,7 @@ export const GET = async (request: NextRequest) => {
        WHERE table_schema = 'public' 
        ORDER BY privilege_type;`
     );
-    return NextResponse.json(data.rows.map(row => row.privilege_type));
+    return NextResponse.json(data.rows.map((row) => row.privilege_type));
   } catch (error) {
     console.error("Error fetching privileges:", error);
     return NextResponse.json(

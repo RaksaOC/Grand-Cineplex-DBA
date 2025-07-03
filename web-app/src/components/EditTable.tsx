@@ -1,4 +1,4 @@
-import { RolesData, TablePrivileges } from "@/app/types/RolesData";
+import { RolesData, TablePrivileges } from "@/types/RolesData";
 import { Check, Save } from "lucide-react";
 import { useState } from "react";
 

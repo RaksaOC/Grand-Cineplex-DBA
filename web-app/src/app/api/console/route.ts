@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/app/utils/db";
+import pool from "@/utils/db";
 
 export const POST = async (request: NextRequest) => {
   const { command } = await request.json();

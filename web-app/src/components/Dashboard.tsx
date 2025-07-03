@@ -1,6 +1,6 @@
 'use client';
 
-import { DashboardData } from '@/app/types/DashboardData';
+import { DashboardData } from '@/types/DashboardData';
 import { Users, Shield, Database, DatabaseBackup, Table, View, CloudLightning, Cog } from 'lucide-react';
 import { useEffect, useState } from 'react';
 

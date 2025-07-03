@@ -3,9 +3,9 @@
 import { Dialog, Transition, Listbox } from '@headlessui/react';
 import { Fragment, useEffect, useState } from 'react';
 import { X, User, Lock, Shield, Check, ChevronsUpDown } from 'lucide-react';
-import { Role } from '@/app/types/Roles';
+import { Role } from '@/types/Roles';
 import axios from 'axios';
-import { RolesData } from '@/app/types/RolesData';
+import { RolesData } from '@/types/RolesData';
 
 interface AddUserProps {
     isOpen: boolean;

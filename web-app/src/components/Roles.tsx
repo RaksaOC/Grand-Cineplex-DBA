@@ -6,12 +6,16 @@ import { AddRole } from './modals/AddRole';
 import axios from 'axios';
 import { EditRole } from './modals/EditRole';
 import DeleteConfirm from './modals/DeleteConfirm';
-import { RolesData, TablePrivileges } from '@/app/types/RolesData';
-import { getPrivDescription } from '@/app/utils/getInfo';
+import { RolesData, TablePrivileges } from '@/types/RolesData';
+import { getPrivDescription } from '@/utils/getInfo';
 import EditTable from './EditTable';
 import EditPrivileges from './EditPrivileges';
+import { Error } from './modals/Error';
 
 export default function RolesManagement() {
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+
     const [refresh, setRefresh] = useState(false);
     const [roles, setRoles] = useState<RolesData[]>([]);
     const [selectedRole, setSelectedRole] = useState<string>('');
@@ -27,11 +31,28 @@ export default function RolesManagement() {
     const [isEditRoleModalOpen, setIsEditRoleModalOpen] = useState(false);
     const [isDeleteRoleModalOpen, setIsDeleteRoleModalOpen] = useState(false);
 
-    const handleEditRole = async (newName: string) => {
-        console.log(newName);
+    const handleEditRole = async (role: string) => {
+        try {
+            await axios.patch('/api/roles', { oldRole: selectedRole, newRole: role });
+            setRefresh(!refresh);
+        } catch (error) {
+            console.error('Failed to edit role:', error);
+        }
     };
-    const handleDeleteRole = async () => {
-        console.log('delete role');
+
+    const handleDeleteRole = async (role: string) => {
+        try {
+            await axios.delete(`/api/roles/${role}`);
+            setRefresh(!refresh);
+        } catch (error: any) {
+            setIsError(true);
+            // Check if error response exists and has data
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.error);
+            } else {
+                setErrorMessage('Failed to delete role. Please try again.');
+            }
+        }
     };
 
     useEffect(() => {
@@ -68,10 +89,6 @@ export default function RolesManagement() {
         };
         fetchRoles();
     }, [refresh]);
-
-    // const currentRole = roles.find(role => role.id === selectedRole);
-
-
 
     if (isLoading) {
         return (
@@ -195,7 +212,10 @@ export default function RolesManagement() {
                                         <div>
                                             <div className="flex items-center justify-between gap-2">
                                                 <h3 className="font-semibold">{role.role}</h3>
-                                                <button className="p-1 hover:bg-white/10 rounded transition-colors" onClick={() => setIsEditRoleModalOpen(true)}>
+                                                <button className="p-1 hover:bg-white/10 rounded transition-colors" onClick={() => {
+                                                    setIsEditRoleModalOpen(true);
+                                                    setSelectedRole(role.role);
+                                                }}>
                                                     <Edit className="w-3 h-3" />
                                                 </button>
                                             </div>
@@ -206,7 +226,10 @@ export default function RolesManagement() {
                                         </div>
                                         <div className="flex items-center space-x-2">
 
-                                            <button className="p-1 hover:bg-white/10 rounded transition-colors" onClick={() => setIsDeleteRoleModalOpen(true)}>
+                                            <button className="p-1 hover:bg-white/10 rounded transition-colors" onClick={() => {
+                                                setIsDeleteRoleModalOpen(true);
+                                                setSelectedRole(role.role);
+                                            }}>
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
@@ -216,7 +239,7 @@ export default function RolesManagement() {
                         </div>
                     </div>
                 </div>
-
+                {/* Tables */}
                 <div className="bg-black border border-slate-700 rounded-xl">
                     <div className="p-6 border-b border-slate-700 flex items-center justify-between">
                         <h3 className="text-xl font-bold text-white">Tables</h3>
@@ -244,7 +267,7 @@ export default function RolesManagement() {
                                                     key={table}
                                                     onClick={() => {
                                                         if (tableWithAccess) {
-                                                            setSelectedTable({ name: table, privileges: allPrivileges });
+                                                            setSelectedTable({ name: table, privileges: tableWithAccess.privileges });
                                                         }
                                                         console.log("tableWithAccess", tableWithAccess);
                                                     }}
@@ -292,7 +315,10 @@ export default function RolesManagement() {
                                     />) : (<div className="p-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {allPrivileges.sort().map((privilege) => {
+                                                console.log("selectedTable?.privileges", selectedTable?.privileges);
+                                                console.log("privilege", privilege);
                                                 const isAccessible = selectedTable?.privileges.includes(privilege);
+                                                console.log(privilege, isAccessible);
                                                 return (
                                                     <div
                                                         key={privilege}
@@ -322,9 +348,10 @@ export default function RolesManagement() {
                     )}
                 </div>
             </div>
-            <AddRole isOpen={isAddRoleModalOpen} onClose={() => setIsAddRoleModalOpen(false)} />
+            <AddRole isOpen={isAddRoleModalOpen} onClose={() => setIsAddRoleModalOpen(false)} onSuccess={() => { setRefresh(!refresh); setIsAddRoleModalOpen(false) }} />
             <EditRole isOpen={isEditRoleModalOpen} onClose={() => setIsEditRoleModalOpen(false)} onSubmit={handleEditRole} currentRole={{ id: selectedRole, name: selectedRole }} />
-            <DeleteConfirm isOpen={isDeleteRoleModalOpen} onClose={() => setIsDeleteRoleModalOpen(false)} onConfirm={handleDeleteRole} title="Delete Role" message="Are you sure you want to delete this role?" />
+            <DeleteConfirm isOpen={isDeleteRoleModalOpen} onClose={() => setIsDeleteRoleModalOpen(false)} onConfirm={() => handleDeleteRole(selectedRole)} title="Delete Role" message="Are you sure you want to delete this role?" />
+            <Error isOpen={isError} onClose={() => setIsError(false)} message={errorMessage} />
         </div >
     );
 } 

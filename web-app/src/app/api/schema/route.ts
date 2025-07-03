@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/app/utils/db";
-import { tables } from "@/app/utils/tables";
-import { Table } from "@/app/types/Schema";
-import { convertDataType } from "@/app/utils/getInfo";
+import pool from "@/utils/db";
+import { tables } from "@/utils/tables";
+import { Table } from "@/types/Schema";
+import { convertDataType } from "@/utils/getInfo";
 
 export async function GET(request: NextRequest) {
   const client = await pool.connect();

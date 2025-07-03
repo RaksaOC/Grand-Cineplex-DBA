@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/app/utils/db";
-import { tables } from "@/app/utils/tables";
-import { DashboardData } from "@/app/types/DashboardData";
+import pool from "@/utils/db";
+import { tables } from "@/utils/tables";
+import { DashboardData } from "@/types/DashboardData";
 
 export const GET = async (req: NextRequest) => {
   let data: DashboardData = {
@@ -51,9 +51,9 @@ export const GET = async (req: NextRequest) => {
       numOfIndexes: numOfIndexes.rows[0].count,
       numOfTriggers: numOfTriggers.rows[0].count,
       recentActivities: recentActivities.rows.map((row: any) => ({
-        usename: row.usename || 'Unknown',
-        ip: row.client_addr || 'Unknown',
-        status: row.state || 'Unknown',
+        usename: row.usename || "Unknown",
+        ip: row.client_addr || "Unknown",
+        status: row.state || "Unknown",
         backend_start: new Date(row.backend_start) || new Date(),
       })),
     };

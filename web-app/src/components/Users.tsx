@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Search, Edit, Trash2, Eye, Filter, Check, X } from 'lucide-react';
-import { User } from '@/app/types/Users';
+import { User } from '@/types/Users';
 import { AddUser } from './modals/AddUser';
 import axios from 'axios';
 import DeleteConfirm from './modals/DeleteConfirm';

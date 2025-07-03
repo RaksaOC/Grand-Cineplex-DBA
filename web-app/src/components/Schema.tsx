@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight, Table, Database, Key, AlertCircle } from 'lucide-react';
-import { Table as TableType, TableColumn } from '@/app/types/Schema';
+import { Table as TableType, TableColumn } from '@/types/Schema';
 import axios from 'axios';
 
 export default function Schema() {
@@ -68,9 +68,9 @@ export default function Schema() {
                 <div className='w-full h-0.5 bg-slate-700'></div>
 
                 {/* Tables */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                <div className="flex flex-wrap gap-2">
                     {[...Array(6)].map((_, i) => (
-                        <div key={i} className="bg-black border border-slate-700 rounded-xl p-6">
+                        <div key={i} className="flex flex-col w-full lg:w-[calc(33.33%-0.5rem)] bg-black border border-slate-700 rounded-xl p-6">
                             <div className="flex items-center space-x-3">
                                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
                                 <div className="h-5 w-5 bg-slate-700 rounded"></div>
@@ -121,52 +121,60 @@ export default function Schema() {
             <div className='w-full h-0.5 bg-slate-700'></div>
 
             {/* Tables */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-                {tables.map((table) => {
-                    const isExpanded = expandedTables.includes(table.name);
-                    return (
-                        <div key={table.name} className="bg-black border border-slate-700 rounded-xl overflow-hidden flex flex-col">
-                            {/* Table Header */}
-                            <button
-                                onClick={() => toggleTable(table.name)}
-                                className="w-full p-6 text-left hover:bg-slate-800/50 transition-colors"
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                        {isExpanded ? (
-                                            <ChevronDown className="w-5 h-5 text-slate-400" />
-                                        ) : (
-                                            <ChevronRight className="w-5 h-5 text-slate-400" />
-                                        )}
-                                        <Table className="w-5 h-5 text-sky-400" />
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-white">{table.name}</h3>
-                                            <p className="text-sm text-slate-400">{table.columns.length} columns</p>
+            <div className='flex flex-wrap gap-2 h-full'>
+                {tables.reduce((rows, table, index) => {
+                    if (index % 3 === 0) rows.push([]);
+                    rows[rows.length - 1].push(table);
+                    return rows;
+                }, []).map((row, rowIndex) => (
+                    <div key={rowIndex} className="flex flex-1 flex-col  lg:max-w-1/3  gap-2  mb-2">
+                        {row.map((table) => {
+                            const isExpanded = expandedTables.includes(table.name);
+                            return (
+                                <div key={table.name} className=" flex flex-col bg-black border border-slate-700 rounded-xl overflow-hidden">
+                                    {/* Table Header */}
+                                    <button
+                                        onClick={() => toggleTable(table.name)}
+                                        className="w-full p-6 text-left hover:bg-slate-800/50 transition-colors"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                {isExpanded ? (
+                                                    <ChevronDown className="w-5 h-5 text-slate-400" />
+                                                ) : (
+                                                    <ChevronRight className="w-5 h-5 text-slate-400" />
+                                                )}
+                                                <Table className="w-5 h-5 text-sky-400" />
+                                                <div>
+                                                    <h3 className="text-lg font-semibold text-white">{table.name}</h3>
+                                                    <p className="text-sm text-slate-400">{table.columns.length} columns</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+
+                                    {/* Table Columns */}
+                                    <div className={`border-t border-slate-700 transition-[max-height,opacity] duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'} overflow-y-auto`}>
+                                        <div className="p-6">
+                                            <div className="space-y-3">
+                                                {table.columns.map((column) => (
+                                                    <div key={column.column_name} className="flex items-center w-full justify-between p-3 bg-slate-800/30 rounded-lg">
+                                                        <div className="flex items-center space-x-2 mt-1">
+                                                            <span className="text-sm text-sky-400">{column.column_name}</span>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <span className="text-xs text-slate-400">{column.data_type}</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </button>
-
-                            {/* Table Columns */}
-                            <div className={`border-t border-slate-700 transition-[max-height,opacity] duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'} overflow-y-auto`}>
-                                <div className="p-6">
-                                    <div className="space-y-3">
-                                        {table.columns.map((column) => (
-                                            <div key={column.column_name} className="flex items-center w-full justify-between p-3 bg-slate-800/30 rounded-lg">
-                                                <div className="flex items-center space-x-2 mt-1">
-                                                    <span className="text-sm text-sky-400">{column.column_name}</span>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-xs text-slate-400">{column.data_type}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+                            );
+                        })}
+                    </div>
+                ))}
             </div>
         </div>
     );

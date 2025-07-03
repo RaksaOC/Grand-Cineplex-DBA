@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/app/utils/db";
-import { tables } from "@/app/utils/tables";
-import { RolesData } from "@/app/types/RolesData";
+import pool from "@/utils/db";
+import { tables } from "@/utils/tables";
+import { RolesData, TablePrivileges } from "@/types/RolesData";
 
 export const GET = async (request: NextRequest) => {
   const client = await pool.connect();
@@ -74,11 +74,17 @@ export const GET = async (request: NextRequest) => {
 export const POST = async (request: NextRequest) => {
   const client = await pool.connect();
   try {
-    const { role, tables, privileges } = await request.json();
+    const {
+      role,
+      tableAndPrivileges,
+    }: { role: string; tableAndPrivileges: TablePrivileges[] } =
+      await request.json();
     await client.query(`CREATE ROLE ${role}`);
-    for (const privilege of privileges) {
-      for (const table of tables) {
-        await client.query(`GRANT ${privilege} ON TABLE ${table} TO ${role}`);
+    for (const table of tableAndPrivileges) {
+      for (const privilege of table.privileges) {
+        await client.query(
+          `GRANT ${privilege} ON TABLE ${table.name} TO ${role}`
+        );
       }
     }
     return NextResponse.json({ message: "Role created successfully" });
@@ -96,17 +102,8 @@ export const POST = async (request: NextRequest) => {
 export const PATCH = async (request: NextRequest) => {
   const client = await pool.connect();
   try {
-    const { role, tables, privileges } = await request.json();
-    // revoke all privileges on all tables
-    for (const table of tables) {
-      await client.query(`REVOKE ALL ON TABLE ${table} FROM ${role}`);
-    }
-    // grant new privileges
-    for (const privilege of privileges) {
-      for (const table of tables) {
-        await client.query(`GRANT ${privilege} ON TABLE ${table} TO ${role}`);
-      }
-    }
+    const { oldRole, newRole } = await request.json();
+    await client.query(`ALTER ROLE ${oldRole} RENAME TO ${newRole}`);
     return NextResponse.json({ message: "Role updated successfully" });
   } catch (error) {
     console.error("Error updating role:", error);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/app/utils/db";
+import pool from "@/utils/db";
 
 export const GET = async (request: NextRequest) => {
   const client = await pool.connect();

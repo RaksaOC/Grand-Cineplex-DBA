@@ -133,3 +133,4 @@ export const EditRole = ({ isOpen, onClose, onSubmit, currentRole }: EditRolePro
         </Transition>
     );
 };
+
