@@ -1,24 +1,37 @@
 'use client';
 
 import { Dialog, Transition, Listbox } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { X, User, Lock, Shield, Check, ChevronsUpDown } from 'lucide-react';
+import { Role } from '@/app/types/Roles';
+import axios from 'axios';
+import { RolesData } from '@/app/types/RolesData';
 
 interface AddUserProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (username: string, password: string, roleId: string | null) => void;
-    roles: { id: string; name: string; }[];
 }
 
-export const AddUser = ({ isOpen, onClose, onSubmit, roles = [
-    { id: "role1", name: "Admin" },
-    { id: "role2", name: "Editor" },
-] }: AddUserProps) => {
+export const AddUser = ({ isOpen, onClose }: AddUserProps) => {
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [selectedRole, setSelectedRole] = useState<{ id: string; name: string; } | null>(null);
+    const [selectedRole, setSelectedRole] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    const [roles, setRoles] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchRoles = async () => {
+            const response = await axios.get('/api/roles');
+
+            // should get roles in an array like ["postgres", "admin", "user"]
+            const data = response.data.map((role: RolesData) => role.role);
+            console.log(data);
+            setRoles(data);
+        }
+        fetchRoles();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,7 +39,11 @@ export const AddUser = ({ isOpen, onClose, onSubmit, roles = [
 
         setIsLoading(true);
         try {
-            await onSubmit(username.trim(), password, selectedRole?.id || null);
+            await axios.post('/api/users', {
+                username: username.trim(),
+                password: password,
+                role: selectedRole || null
+            });
             setUsername('');
             setPassword('');
             setSelectedRole(null);
@@ -125,12 +142,12 @@ export const AddUser = ({ isOpen, onClose, onSubmit, roles = [
                                         <label className="block text-sm font-medium text-slate-300">
                                             Assign Role
                                         </label>
-                                        <Listbox value={selectedRole} onChange={setSelectedRole}>
+                                        <Listbox value={selectedRole} onChange={(value) => setSelectedRole(value)}>
                                             <div className="relative">
                                                 <Listbox.Button className="relative w-full pl-10 pr-10 py-3 bg-black border border-slate-600 rounded-lg text-left focus:outline-none focus:border-sky-500 transition-colors">
                                                     <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                                                     <span className={`block truncate ${selectedRole ? 'text-white' : 'text-slate-400'}`}>
-                                                        {selectedRole ? selectedRole.name : 'None'}
+                                                        {selectedRole || 'None'}
                                                     </span>
                                                     <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                                         <ChevronsUpDown className="h-5 w-5 text-slate-400" aria-hidden="true" />
@@ -148,7 +165,7 @@ export const AddUser = ({ isOpen, onClose, onSubmit, roles = [
                                                                 `relative cursor-pointer select-none py-2 pl-10 pr-4 ${active ? 'bg-sky-500/10 text-sky-400' : 'text-slate-400'
                                                                 }`
                                                             }
-                                                            value={null}
+                                                            value={""}
                                                         >
                                                             {({ selected, active }) => (
                                                                 <>
@@ -165,7 +182,7 @@ export const AddUser = ({ isOpen, onClose, onSubmit, roles = [
                                                         </Listbox.Option>
                                                         {roles.map((role) => (
                                                             <Listbox.Option
-                                                                key={role.id}
+                                                                key={role}
                                                                 className={({ active }) =>
                                                                     `relative cursor-pointer select-none py-2 pl-10 pr-4 ${active ? 'bg-sky-500/10 text-sky-400' : 'text-slate-400'
                                                                     }`
@@ -175,7 +192,7 @@ export const AddUser = ({ isOpen, onClose, onSubmit, roles = [
                                                                 {({ selected, active }) => (
                                                                     <>
                                                                         <span className={`block truncate ${selected ? 'font-medium text-sky-400' : ''}`}>
-                                                                            {role.name}
+                                                                            {role}
                                                                         </span>
                                                                         {selected ? (
                                                                             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sky-400">

@@ -1,8 +1,11 @@
 'use client';
 
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { X, Shield, Check, Database } from 'lucide-react';
+import axios from 'axios';
+import { Table } from '@/app/types/Schema';
+import { getPrivDescription } from '@/app/utils/getInfo';
 
 interface AddRoleProps {
     isOpen: boolean;
@@ -16,27 +19,29 @@ export const AddRole = ({ isOpen, onClose, onSubmit }: AddRoleProps) => {
     const [selectedTables, setSelectedTables] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Mock data for privileges
-    const privileges = [
-        { id: 'read', name: 'Read Data', description: 'View database records' },
-        { id: 'write', name: 'Write Data', description: 'Create and update records' },
-        { id: 'delete', name: 'Delete Data', description: 'Remove records from database' },
-        { id: 'create_users', name: 'Create Users', description: 'Add new user accounts' },
-        { id: 'manage_roles', name: 'Manage Roles', description: 'Create and modify roles' },
-        { id: 'system_config', name: 'System Configuration', description: 'Modify system settings' },
-        { id: 'view_reports', name: 'View Reports', description: 'Access system reports' },
-        { id: 'backup_restore', name: 'Backup & Restore', description: 'Database backup operations' }
-    ];
+    const [privileges, setPrivileges] = useState<string[]>([]);
+    const [tables, setTables] = useState<string[]>([]);
 
-    // Mock data for tables
-    const tables = [
-        { id: 'users', name: 'Users Table', description: 'User account information' },
-        { id: 'roles', name: 'Roles Table', description: 'Role definitions and permissions' },
-        { id: 'permissions', name: 'Permissions Table', description: 'System permissions' },
-        { id: 'audit_logs', name: 'Audit Logs', description: 'System activity logs' },
-        { id: 'backups', name: 'Backups Table', description: 'Database backup records' },
-        { id: 'settings', name: 'Settings Table', description: 'System configuration' }
-    ];
+    useEffect(() => {
+        const fetchPrivileges = async () => {
+            try {
+                const response = await axios.get('/api/privileges');
+                setPrivileges(response.data);
+            } catch (error) {
+                console.error('Failed to fetch privileges:', error);
+            }
+        }
+        fetchPrivileges();
+        const fetchTables = async () => {
+            try {
+                const response = await axios.get('/api/tables');
+                setTables(response.data);
+            } catch (error) {
+                console.error('Failed to fetch tables:', error);
+            }
+        }
+        fetchTables();
+    }, []);
 
     const handlePrivilegeToggle = (privilegeId: string) => {
         setSelectedPrivileges(prev =>
@@ -140,11 +145,11 @@ export const AddRole = ({ isOpen, onClose, onSubmit }: AddRoleProps) => {
                                         <h3 className="text-lg font-semibold text-white">Privileges</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             {privileges.map((privilege) => {
-                                                const isSelected = selectedPrivileges.includes(privilege.id);
+                                                const isSelected = selectedPrivileges.includes(privilege);
                                                 return (
                                                     <div
-                                                        key={privilege.id}
-                                                        onClick={() => handlePrivilegeToggle(privilege.id)}
+                                                        key={privilege}
+                                                        onClick={() => handlePrivilegeToggle(privilege)}
                                                         className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer ${isSelected
                                                             ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
                                                             : 'bg-black border-slate-600 text-slate-400 hover:border-slate-500'
@@ -152,8 +157,8 @@ export const AddRole = ({ isOpen, onClose, onSubmit }: AddRoleProps) => {
                                                     >
                                                         <div className="flex items-center justify-between">
                                                             <div>
-                                                                <h4 className="font-medium text-sm">{privilege.name}</h4>
-                                                                <p className="text-xs mt-1 opacity-75">{privilege.description}</p>
+                                                                <h4 className="font-medium text-sm">{privilege}</h4>
+                                                                <p className="text-xs mt-1 opacity-75">{getPrivDescription(privilege)}</p>
                                                             </div>
                                                             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected
                                                                 ? 'bg-sky-500/50 border-sky-500/50'
@@ -173,11 +178,11 @@ export const AddRole = ({ isOpen, onClose, onSubmit }: AddRoleProps) => {
                                         <h3 className="text-lg font-semibold text-white">Table Access</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             {tables.map((table) => {
-                                                const isSelected = selectedTables.includes(table.id);
+                                                const isSelected = selectedTables.includes(table);
                                                 return (
                                                     <div
-                                                        key={table.id}
-                                                        onClick={() => handleTableToggle(table.id)}
+                                                        key={table}
+                                                        onClick={() => handleTableToggle(table)}
                                                         className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer ${isSelected
                                                             ? 'bg-sky-500/10 border-sky-500/30 text-sky-400'
                                                             : 'bg-black border-slate-600 text-slate-400 hover:border-slate-500'
@@ -185,8 +190,7 @@ export const AddRole = ({ isOpen, onClose, onSubmit }: AddRoleProps) => {
                                                     >
                                                         <div className="flex items-center justify-between">
                                                             <div>
-                                                                <h4 className="font-medium text-sm">{table.name}</h4>
-                                                                <p className="text-xs mt-1 opacity-75">{table.description}</p>
+                                                                <h4 className="font-medium text-sm">{table}</h4>
                                                             </div>
                                                             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected
                                                                 ? 'bg-sky-500/50 border-sky-500/50'
