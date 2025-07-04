@@ -149,13 +149,26 @@ if __name__ == "__main__":
 
             {/* Backup Configuration */}
             <div className="bg-black border border-slate-700 rounded-xl p-6">
-                <div className="flex items-center space-x-3 mb-6">
-                    <Database className="w-6 h-6 text-sky-400" />
-                    <h2 className="text-xl font-semibold text-white">Backup Configuration</h2>
-                </div>
+                <button
+                    onClick={generateBackupScript}
+                    disabled={isGenerating}
+                    className="w-full bg-sky-500/20 border border-sky-500/30 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-sky-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                    {isGenerating ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <span>Generating Script...</span>
+                        </>
+                    ) : (
+                        <>
+                            <FileText className="w-5 h-5" />
+                            <span>Generate Backup Script</span>
+                        </>
+                    )}
+                </button>
 
-                <div className="space-y-4">
-                    <div className="flex items-center space-x-3 p-4 bg-slate-800/50 border border-slate-600 rounded-lg">
+                {/* <div className="space-y-4"> */}
+                {/* <div className="flex items-center space-x-3 p-4 bg-slate-800/50 border border-slate-600 rounded-lg">
                         <div className="w-4 h-4 bg-sky-500 rounded-full flex items-center justify-center">
                             <Check className="w-3 h-3 text-white" />
                         </div>
@@ -163,9 +176,9 @@ if __name__ == "__main__":
                             <h3 className="font-medium text-white">Full Database Backup</h3>
                             <p className="text-sm text-slate-400">Complete backup including schema, data, indexes, and constraints</p>
                         </div>
-                    </div>
+                    </div> */}
 
-                    <button
+                {/* <button
                         onClick={generateBackupScript}
                         disabled={isGenerating}
                         className="w-full bg-sky-500/20 border border-sky-500/30 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-sky-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
@@ -181,8 +194,8 @@ if __name__ == "__main__":
                                 <span>Generate Backup Script</span>
                             </>
                         )}
-                    </button>
-                </div>
+                    </button> */}
+                {/* </div> */}
             </div>
 
 
@@ -222,7 +235,7 @@ if __name__ == "__main__":
                         </div>
                     </div>
                     <div className="p-4">
-                        <pre className="text-sm text-slate-300 bg-slate-900/50 border border-slate-600 rounded-lg p-4 overflow-x-auto whitespace-pre-wrap font-mono">
+                        <pre className="text-sm text-slate-300  overflow-x-auto whitespace-pre-wrap">
                             {generatedScript}
                         </pre>
                     </div>

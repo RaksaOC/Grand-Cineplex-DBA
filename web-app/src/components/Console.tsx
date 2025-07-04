@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { useState, useRef, useEffect } from 'react';
 import { Terminal } from 'lucide-react';
@@ -30,7 +30,7 @@ export default function Console() {
                 return;
             }
             setIsLoading(true);
-            const response = await axios.post('/api/console', { command });
+            const response = await axios.post('/api/console', { command: command });
 
             const newEntry: CommandHistory = {
                 command,
@@ -43,13 +43,21 @@ export default function Console() {
             setCommandIndex(0);
             consoleRef.current?.focus();
         } catch (error) {
-            console.error("Error executing command:", error);
-            const newEntry: CommandHistory = {
-                command,
-                result: "Error executing command",
-                timestamp: new Date()
-            };
-            setCommandHistory(prev => [...prev, newEntry]);
+            if (error.response && error.response.data) {
+                const newEntry: CommandHistory = {
+                    command,
+                    result: error.response.data.error,
+                    timestamp: new Date()
+                };
+                setCommandHistory(prev => [...prev, newEntry]);
+            } else {
+                const newEntry: CommandHistory = {
+                    command,
+                    result: "Error executing command",
+                    timestamp: new Date()
+                };
+                setCommandHistory(prev => [...prev, newEntry]);
+            }
             setCurrentCommand('');
         } finally {
             setIsLoading(false);

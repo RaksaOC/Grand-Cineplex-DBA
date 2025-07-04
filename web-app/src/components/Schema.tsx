@@ -19,6 +19,7 @@ export default function Schema() {
                 const data = response.data;
                 setTables(data.map((table: TableType) => ({
                     name: table.name,
+                    rowCount: table.rowCount,
                     columns: table.columns.map((column: TableColumn) => ({
                         column_name: column.column_name,
                         data_type: column.data_type,
@@ -147,7 +148,11 @@ export default function Schema() {
                                                 <Table className="w-5 h-5 text-sky-400" />
                                                 <div>
                                                     <h3 className="text-lg font-semibold text-white">{table.name}</h3>
-                                                    <p className="text-sm text-slate-400">{table.columns.length} columns</p>
+                                                    <div className="flex items-center space-x-3">
+                                                        <p className="text-sm text-slate-400">{table.columns.length} columns</p>
+                                                        <div className="w-2 h-2 rounded-full bg-sky-400 inline-block"></div>
+                                                        <p className="text-sm text-slate-400">{table.rowCount.toLocaleString()} rows</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

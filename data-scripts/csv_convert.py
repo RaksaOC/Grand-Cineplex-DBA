@@ -5,9 +5,9 @@ from datetime import datetime, timedelta
 
 # change the values file to the one you want to use
 
-from values_medium import *
+# from values_medium import *
 # from values_large import *
-# from values_small import *
+from values_small import *
 
 fake = Faker()
 Faker.seed(42)
