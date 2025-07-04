@@ -6,21 +6,33 @@ import { User } from '@/types/Users';
 import { AddUser } from './modals/AddUser';
 import axios from 'axios';
 import DeleteConfirm from './modals/DeleteConfirm';
+import { EditUser } from './modals/EditUser';
+import Error from './modals/Error';
 
 export default function Users() {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterRole, setFilterRole] = useState('all');
+    const [refresh, setRefresh] = useState(false);
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
     const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
+    const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+    const [currentUsername, setCurrentUsername] = useState('');
 
-    const handleDeleteUser = async (username: string) => {
+    const handleDeleteUser = async () => {
         try {
-            // await axios.delete(`/api/users/${username}`);
-            // setUsers(users.filter((user: User) => user.username !== username));
+            await axios.delete(`/api/users/${currentUsername}`);
             setIsDeleteUserModalOpen(false);
+            setRefresh(!refresh);
         } catch (error) {
+            setIsError(true);
+            // Check if error response exists and has data
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.error);
+            } else {
+                setErrorMessage('Failed to delete user. Please try again.');
+            }
             console.error('Failed to delete user:', error);
         }
     };
@@ -35,7 +47,7 @@ export default function Users() {
             }
         };
         fetchUsers();
-    }, []);
+    }, [refresh]);
 
 
 
@@ -173,10 +185,16 @@ export default function Users() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center justify-end space-x-2">
-                                            <button className="p-2 text-slate-400 hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-colors">
+                                            <button className="p-2 text-slate-400 hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition-colors" onClick={() => {
+                                                setCurrentUsername(user.username);
+                                                setIsEditUserModalOpen(true);
+                                            }}>
                                                 <Edit className="w-4 h-4" />
                                             </button>
-                                            <button className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" onClick={() => setIsDeleteUserModalOpen(true)}>
+                                            <button className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" onClick={() => {
+                                                setCurrentUsername(user.username);
+                                                setIsDeleteUserModalOpen(true);
+                                            }}>
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
@@ -186,9 +204,11 @@ export default function Users() {
                         </tbody>
                     </table>
                 </div>
-                <DeleteConfirm isOpen={isDeleteUserModalOpen} onClose={() => setIsDeleteUserModalOpen(false)} onConfirm={() => handleDeleteUser("")} title="Delete User" message="Are you sure you want to delete this user?" />
+                <DeleteConfirm isOpen={isDeleteUserModalOpen} onClose={() => setIsDeleteUserModalOpen(false)} onConfirm={handleDeleteUser} title="Delete User" message="Are you sure you want to delete this user?" />
             </div>
             <AddUser isOpen={isAddUserModalOpen} onClose={() => setIsAddUserModalOpen(false)} />
+            <EditUser isOpen={isEditUserModalOpen} onClose={() => setIsEditUserModalOpen(false)} currentUsername={currentUsername} onSuccess={() => setRefresh(!refresh)} />
+            <Error isOpen={isError} onClose={() => setIsError(false)} message={errorMessage} />
         </div>
     );
 } 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Check, Save, View, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Check, Save, View, Eye, Info } from 'lucide-react';
 import { AddRole } from './modals/AddRole';
 import axios from 'axios';
 import { EditRole } from './modals/EditRole';
@@ -10,11 +10,20 @@ import { RolesData, TablePrivileges } from '@/types/RolesData';
 import { getPrivDescription } from '@/utils/getInfo';
 import EditTable from './EditTable';
 import EditPrivileges from './EditPrivileges';
-import { Error } from './modals/Error';
+import Error from './modals/Error';
+import InfoModal from './modals/Info';
+
+const Blocker = () => {
+    return (
+        <div className="absolute top-0 left-0 w-full h-full bg-black/50 z-10"></div>
+    )
+}
 
 export default function RolesManagement() {
     const [isError, setIsError] = useState(false);
+    const [isInfo, setIsInfo] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [infoMessage, setInfoMessage] = useState('');
 
     const [refresh, setRefresh] = useState(false);
     const [roles, setRoles] = useState<RolesData[]>([]);
@@ -34,6 +43,7 @@ export default function RolesManagement() {
     const handleEditRole = async (role: string) => {
         try {
             await axios.patch('/api/roles', { oldRole: selectedRole, newRole: role });
+            setIsEditRoleModalOpen(false);
             setRefresh(!refresh);
         } catch (error) {
             console.error('Failed to edit role:', error);
@@ -193,7 +203,17 @@ export default function RolesManagement() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Roles List */}
-                <div className="lg:col-span-1">
+                <div className="lg:col-span-1 relative">
+                    {
+                        isEditPrivileges && (
+                            <Blocker />
+                        )
+                    }
+                    {
+                        isEditTable && (
+                            <Blocker />
+                        )
+                    }
                     <div className="bg-black border border-slate-700 rounded-xl">
                         <div className="p-6 border-b border-slate-700">
                             <h2 className="text-xl font-bold text-white">Roles</h2>
@@ -240,7 +260,12 @@ export default function RolesManagement() {
                     </div>
                 </div>
                 {/* Tables */}
-                <div className="bg-black border border-slate-700 rounded-xl">
+                <div className="bg-black border border-slate-700 rounded-xl relative">
+                    {
+                        isEditPrivileges && (
+                            <Blocker />
+                        )
+                    }
                     <div className="p-6 border-b border-slate-700 flex items-center justify-between">
                         <h3 className="text-xl font-bold text-white">Tables</h3>
                         <button className={`text-white ${isEditPrivileges ? 'cursor-not-allowed opacity-50' : ''}`} disabled={isEditPrivileges} onClick={() => setIsEditTable(!isEditTable)}>
@@ -254,7 +279,17 @@ export default function RolesManagement() {
                             allTables={allTables.map(t => ({ name: t, privileges: [] }))}
                             accessibleTables={roles.find(role => role.role === selectedRole)?.tables.map(t => ({ name: t.name, privileges: t.privileges })) || []}
                             selectedRole={selectedRole}
-                            onSave={() => setIsEditTable(false)}
+                            onSuccess={() => {
+                                setIsEditTable(false);
+                                setRefresh(!refresh);
+                                setIsInfo(true);
+                                setInfoMessage(
+                                    `Table access updated. Only select privileges were granted to added tables. Go to privileges section to edit other privileges.`
+                                );
+                                setTimeout(() => {
+                                    setIsInfo(false);
+                                }, 10000);
+                            }}
                         />)
                             :
                             (
@@ -271,9 +306,9 @@ export default function RolesManagement() {
                                                         }
                                                         console.log("tableWithAccess", tableWithAccess);
                                                     }}
-                                                    className={`p-4 rounded-lg border transition-all duration-200 cursor-pointer ${tableWithAccess
-                                                        ? 'bg-black border-slate-600 text-slate-400 hover:border-slate-500'
-                                                        : 'bg-slate-600 border-slate-600 text-slate-400 hover:border-slate-500 cursor-not-allowed'} 
+                                                    className={`p-4 rounded-lg border transition-all duration-200  ${tableWithAccess
+                                                        ? 'bg-black border-slate-600 text-slate-400 hover:border-slate-500 cursor-pointer'
+                                                        : 'bg-slate-500/20 opacity-50 border-slate-600 text-white  cursor-not-allowed'} 
                                                         ${selectedTable?.name === table ? 'bg-sky-700/50 border-sky-500 text-white' : ''}`}
                                                 >
                                                     <div className="flex items-center justify-between">
@@ -292,8 +327,13 @@ export default function RolesManagement() {
                 </div>
 
                 {/* Role Details */}
-                <div className="lg:col-span-2">
-                    {selectedRole && (
+                <div className="lg:col-span-2 relative">
+                    {
+                        isEditTable && (
+                            <Blocker />
+                        )
+                    }
+                    {(selectedRole && selectedTable) ? (
                         <div className="space-y-6">
                             {/* Permissions */}
                             <div className="bg-black border border-slate-700 rounded-xl">
@@ -307,7 +347,10 @@ export default function RolesManagement() {
                                 </div>
                                 {
                                     isEditPrivileges ? (<EditPrivileges
-                                        onSave={() => setIsEditPrivileges(false)}
+                                        onSuccess={() => {
+                                            setIsEditPrivileges(false);
+                                            setRefresh(!refresh);
+                                        }}
                                         allPrivileges={allPrivileges}
                                         accessiblePrivileges={selectedTable?.privileges}
                                         selectedTable={selectedTable}
@@ -341,9 +384,11 @@ export default function RolesManagement() {
                                 }
 
                             </div>
-                            {/* Tables */}
 
-
+                        </div>
+                    ) : (
+                        <div className="p-6">
+                            <h3 className="text-xl font-bold text-white">No table selected</h3>
                         </div>
                     )}
                 </div>
@@ -352,6 +397,7 @@ export default function RolesManagement() {
             <EditRole isOpen={isEditRoleModalOpen} onClose={() => setIsEditRoleModalOpen(false)} onSubmit={handleEditRole} currentRole={{ id: selectedRole, name: selectedRole }} />
             <DeleteConfirm isOpen={isDeleteRoleModalOpen} onClose={() => setIsDeleteRoleModalOpen(false)} onConfirm={() => handleDeleteRole(selectedRole)} title="Delete Role" message="Are you sure you want to delete this role?" />
             <Error isOpen={isError} onClose={() => setIsError(false)} message={errorMessage} />
+            <InfoModal isOpen={isInfo} onClose={() => setIsInfo(false)} title="Success" message={infoMessage} />
         </div >
     );
 } 

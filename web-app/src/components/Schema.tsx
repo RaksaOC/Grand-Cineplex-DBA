@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight, Table, Database, Key, AlertCircle } from 'lucide-react';
 import { Table as TableType, TableColumn } from '@/types/Schema';
 import axios from 'axios';
+import { formatNumber } from '@/utils/fomat';
 
 export default function Schema() {
     const [tables, setTables] = useState<TableType[]>([]);
@@ -149,9 +150,9 @@ export default function Schema() {
                                                 <div>
                                                     <h3 className="text-lg font-semibold text-white">{table.name}</h3>
                                                     <div className="flex items-center space-x-3">
-                                                        <p className="text-sm text-slate-400">{table.columns.length} columns</p>
+                                                        <p className="text-sm text-slate-400">{table.columns.length} cols</p>
                                                         <div className="w-2 h-2 rounded-full bg-sky-400 inline-block"></div>
-                                                        <p className="text-sm text-slate-400">{table.rowCount.toLocaleString()} rows</p>
+                                                        <p className="text-sm text-slate-400">{formatNumber(table.rowCount)} rows</p>
                                                     </div>
                                                 </div>
                                             </div>
