@@ -1,4 +1,5 @@
-import pool from "@/utils/db";
+import pool from "@/config/db";
+import { verifyToken } from "@/config/verifyToken";
 import { NextRequest, NextResponse } from "next/server";
 
 export const PATCH = async (
@@ -6,14 +7,13 @@ export const PATCH = async (
   { params }: { params: { username: string } }
 ) => {
   const client = await pool.connect();
+  await verifyToken(request);
   const { username } = await params;
   const { username: newUsername, password } = await request.json();
 
   try {
     if (password !== "") {
-      await client.query(
-        `ALTER USER ${username} WITH PASSWORD = ${password}`
-      );
+      await client.query(`ALTER USER ${username} WITH PASSWORD = ${password}`);
     }
     if (newUsername !== username && newUsername !== "") {
       await client.query(`ALTER USER ${username} RENAME TO ${newUsername}`);

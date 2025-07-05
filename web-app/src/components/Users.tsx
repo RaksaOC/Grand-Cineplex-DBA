@@ -8,6 +8,7 @@ import axios from 'axios';
 import DeleteConfirm from './modals/DeleteConfirm';
 import { EditUser } from './modals/EditUser';
 import Error from './modals/Error';
+import api from '@/config/api';
 
 export default function Users() {
     const [refresh, setRefresh] = useState(false);
@@ -22,7 +23,7 @@ export default function Users() {
 
     const handleDeleteUser = async () => {
         try {
-            await axios.delete(`/api/users/${currentUsername}`);
+            await api.delete(`/users/${currentUsername}`);
             setIsDeleteUserModalOpen(false);
             setRefresh(!refresh);
         } catch (error) {
@@ -40,7 +41,7 @@ export default function Users() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('/api/users');
+                const response = await api.get('/users');
                 setUsers(response.data);
             } finally {
                 setIsLoading(false);

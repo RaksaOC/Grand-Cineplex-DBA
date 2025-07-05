@@ -1,5 +1,5 @@
+import api from "@/config/api";
 import { TablePrivileges } from "@/types/RolesData";
-import axios from "axios";
 import { Check, Save } from "lucide-react";
 import { useState } from "react";
 
@@ -62,7 +62,7 @@ export default function EditTable({ allTables, accessibleTables, selectedRole, o
 
     const handleSave = async () => {
         try {
-            await axios.patch(`/api/roles/${selectedRole}/table`, {
+            await api.patch(`/roles/${selectedRole}/table`, {
                 updatedTables: Array.from(selectedTables)
             });
             onSuccess();

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/utils/db";
+import pool from "@/config/db";
 import { tables } from "@/utils/tables";
 import { RolesData, TablePrivileges } from "@/types/RolesData";
+import { verifyToken } from "@/config/verifyToken";
 
 export const GET = async (request: NextRequest) => {
   const client = await pool.connect();
+  await verifyToken(request);
   try {
     const data: RolesData[] = [];
 

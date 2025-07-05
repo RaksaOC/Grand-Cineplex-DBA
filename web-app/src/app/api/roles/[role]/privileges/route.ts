@@ -1,4 +1,5 @@
-import pool from "@/utils/db";
+import pool from "@/config/db";
+import { verifyToken } from "@/config/verifyToken";
 import { NextRequest, NextResponse } from "next/server";
 
 export const PATCH = async (
@@ -6,6 +7,7 @@ export const PATCH = async (
   { params }: { params: { role: string } }
 ) => {
   const client = await pool.connect();
+  await verifyToken(request);
   const { role } = await params;
   try {
     const { table, updatedPrivileges } = await request.json();

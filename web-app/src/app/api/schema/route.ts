@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/utils/db";
+import pool from "@/config/db";
 import { tables } from "@/utils/tables";
 import { Table } from "@/types/Schema";
 import { convertDataType } from "@/utils/getInfo";
+import { verifyToken } from "@/config/verifyToken";
 
 export async function GET(request: NextRequest) {
   const client = await pool.connect();
+  await verifyToken(request);
   try {
     const tableNames = await client.query(
       `SELECT table_name FROM ${tables.schema.tables} WHERE table_type = 'BASE TABLE' AND table_schema = 'public'`

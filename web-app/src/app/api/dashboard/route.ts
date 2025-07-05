@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/utils/db";
+import pool from "@/config/db";
 import { tables } from "@/utils/tables";
 import { DashboardData } from "@/types/DashboardData";
+import { verifyToken } from "@/config/verifyToken";
 
 export const GET = async (req: NextRequest) => {
+  const client = await pool.connect();
+  await verifyToken(req);
+
   let data: DashboardData = {
     numOfUsers: 0,
     numOfRoles: 0,
@@ -15,7 +19,6 @@ export const GET = async (req: NextRequest) => {
     numOfTriggers: 0,
     recentActivities: [],
   };
-  const client = await pool.connect();
   try {
     const numOfUsers = await client.query(
       `SELECT COUNT(*) FROM ${tables.roles.pg_user}`

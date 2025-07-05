@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/utils/db";
+import pool from "@/config/db";
+import { verifyToken } from "@/config/verifyToken";
 
 export const GET = async (request: NextRequest) => {
   const client = await pool.connect();
+  await verifyToken(request);
   try {
     const data = await client.query(
       "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"

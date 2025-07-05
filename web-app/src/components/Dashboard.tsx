@@ -1,5 +1,6 @@
 'use client';
 
+import api from '@/config/api';
 import { DashboardData } from '@/types/DashboardData';
 import { Users, Shield, Database, DatabaseBackup, Table, View, CloudLightning, Cog } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -64,8 +65,8 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const response = await fetch('/api/dashboard');
-                const data = await response.json();
+                const response = await api.get('/dashboard');
+                const data = response.data;
                 setDashboardData(data);
             } finally {
                 setIsLoading(false);

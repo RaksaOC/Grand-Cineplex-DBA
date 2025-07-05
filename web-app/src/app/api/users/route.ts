@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { tables } from "@/utils/tables";
-import pool from "@/utils/db";
+import pool from "@/config/db";
+import { verifyToken } from "@/config/verifyToken";
 
-export const GET = async () => {
+export const GET = async (request: NextRequest) => {
   const client = await pool.connect();
+  await verifyToken(request);
   try {
     const users = await client.query(
       `SELECT usename, usesuper, usecreatedb, userepl, usebypassrls, valuntil FROM ${tables.roles.pg_user} WHERE passwd IS NOT NULL`

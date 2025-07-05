@@ -1,6 +1,6 @@
+import api from "@/config/api";
 import { TablePrivileges } from "@/types/RolesData";
 import { getPrivDescription } from "@/utils/getInfo";
-import axios from "axios";
 import { Check, Save } from "lucide-react";
 import { useState } from "react";
 
@@ -39,7 +39,7 @@ export default function EditPrivileges({ allPrivileges, accessiblePrivileges, se
     const [selectedPrivileges, setSelectedPrivileges] = useState<Set<string>>(new Set(accessiblePrivileges));
 
     const handleSave = async () => {
-        const response = await axios.patch(`/api/roles/${selectedRole}/privileges`, {
+        const response = await api.patch(`/roles/${selectedRole}/privileges`, {
             table: selectedTable.name,
             updatedPrivileges: Array.from(selectedPrivileges)
         });

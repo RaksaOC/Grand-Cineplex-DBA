@@ -7,6 +7,7 @@ import axios from 'axios';
 import { Table } from '@/types/Schema';
 import { getPrivDescription } from '@/utils/getInfo';
 import { TablePrivileges } from '@/types/RolesData';
+import api from '@/config/api';
 
 interface AddRoleProps {
     isOpen: boolean;
@@ -29,7 +30,7 @@ export const AddRole = ({ isOpen, onClose, onSuccess }: AddRoleProps) => {
     useEffect(() => {
         const fetchPrivileges = async () => {
             try {
-                const response = await axios.get('/api/privileges');
+                const response = await api.get('/privileges');
                 setPrivileges(response.data);
             } catch (error) {
                 console.error('Failed to fetch privileges:', error);
@@ -38,7 +39,7 @@ export const AddRole = ({ isOpen, onClose, onSuccess }: AddRoleProps) => {
         }
         const fetchTables = async () => {
             try {
-                const response = await axios.get('/api/tables');
+                const response = await api.get('/tables');
                 setTables(response.data);
                 const newData = (response.data.map((table: string) => {
                     return {

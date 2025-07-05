@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/utils/db";
+import pool from "@/config/db";
+import { verifyToken } from "@/config/verifyToken";
 
-export const POST = async (request: NextRequest) => {
+const POST = async (request: NextRequest) => {
   const client = await pool.connect();
+  await verifyToken(request);
+
   const { command } = await request.json();
   try {
     const splitCommand = command.split(" ");

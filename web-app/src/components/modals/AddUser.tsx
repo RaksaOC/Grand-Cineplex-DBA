@@ -6,6 +6,7 @@ import { X, User, Lock, Shield, Check, ChevronsUpDown } from 'lucide-react';
 import { Role } from '@/types/Roles';
 import axios from 'axios';
 import { RolesData } from '@/types/RolesData';
+import api from '@/config/api';
 
 interface AddUserProps {
     isOpen: boolean;
@@ -23,7 +24,7 @@ export const AddUser = ({ isOpen, onClose }: AddUserProps) => {
 
     useEffect(() => {
         const fetchRoles = async () => {
-            const response = await axios.get('/api/roles');
+            const response = await api.get('/roles');
 
             // should get roles in an array like ["postgres", "admin", "user"]
             const data = response.data.map((role: RolesData) => role.role);

@@ -12,6 +12,7 @@ import EditTable from './EditTable';
 import EditPrivileges from './EditPrivileges';
 import Error from './modals/Error';
 import InfoModal from './modals/Info';
+import api from '@/config/api';
 
 const Blocker = () => {
     return (
@@ -42,7 +43,7 @@ export default function RolesManagement() {
 
     const handleEditRole = async (role: string) => {
         try {
-            await axios.patch('/api/roles', { oldRole: selectedRole, newRole: role });
+            await api.patch('/roles', { oldRole: selectedRole, newRole: role });
             setIsEditRoleModalOpen(false);
             setRefresh(!refresh);
         } catch (error) {
@@ -68,7 +69,7 @@ export default function RolesManagement() {
     useEffect(() => {
         const fetchTables = async () => {
             try {
-                const response = await axios.get('/api/tables');
+                const response = await api.get('/tables');
                 setAllTables(response.data);
             } catch (error) {
                 console.error('Failed to fetch tables:', error);
@@ -76,7 +77,7 @@ export default function RolesManagement() {
         };
         const fetchPrivileges = async () => {
             try {
-                const response = await axios.get('/api/privileges');
+                const response = await api.get('/privileges');
                 setAllPrivileges(response.data);
             } catch (error) {
                 console.error('Failed to fetch privileges:', error);
@@ -87,7 +88,7 @@ export default function RolesManagement() {
 
         const fetchRoles = async () => {
             try {
-                const response = await axios.get('/api/roles');
+                const response = await api.get('/roles');
                 setRoles(response.data);
                 setSelectedRole(response.data[0].role);
                 setSelectedTable(response.data[0].tables[0]);

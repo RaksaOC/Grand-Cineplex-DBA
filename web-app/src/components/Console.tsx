@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Check, Copy, Terminal } from 'lucide-react';
-import axios from 'axios';
+import api from '@/config/api';
 
 interface CommandHistory {
     command: string;
@@ -48,7 +48,7 @@ export default function Console() {
             }
 
             setIsLoading(true);
-            const response = await axios.post('/api/console', { command: command });
+            const response = await api.post('/console', { command: command });
 
             // Safely handle the response data
             const result = response.data?.result || response.data;

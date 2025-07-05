@@ -1,4 +1,5 @@
-import pool from "@/utils/db";
+import pool from "@/config/db";
+import { verifyToken } from "@/config/verifyToken";
 import { tables } from "@/utils/tables";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,6 +8,7 @@ export const DELETE = async (
   { params }: { params: { role: string } }
 ) => {
   const client = await pool.connect();
+  await verifyToken(request);
   try {
     const { role } = params;
     await client.query(`DROP ROLE ${role}`);
@@ -21,4 +23,3 @@ export const DELETE = async (
     client.release();
   }
 };
-

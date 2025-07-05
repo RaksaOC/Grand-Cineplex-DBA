@@ -5,6 +5,7 @@ import { ChevronDown, ChevronRight, Table, Database, Key, AlertCircle } from 'lu
 import { Table as TableType, TableColumn } from '@/types/Schema';
 import axios from 'axios';
 import { formatNumber } from '@/utils/fomat';
+import api from '@/config/api';
 
 export default function Schema() {
     const [tables, setTables] = useState<TableType[]>([]);
@@ -16,7 +17,7 @@ export default function Schema() {
     useEffect(() => {
         const fetchTables = async () => {
             try {
-                const response = await axios.get("/api/schema");
+                const response = await api.get("/schema");
                 const data = response.data;
                 setTables(data.map((table: TableType) => ({
                     name: table.name,
