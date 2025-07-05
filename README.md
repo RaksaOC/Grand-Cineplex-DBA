@@ -1,4 +1,4 @@
-# 🎬 Universal Database Administration System
+# Database Administration System
 
 A comprehensive database management system with scalable data generation utilities and a modern web interface for database administration.
 
