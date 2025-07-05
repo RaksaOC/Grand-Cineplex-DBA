@@ -53,7 +53,7 @@ export default function RolesManagement() {
 
     const handleDeleteRole = async (role: string) => {
         try {
-            await axios.delete(`/api/roles/${role}`);
+            await api.delete(`/roles/${role}`);
             setRefresh(!refresh);
         } catch (error: any) {
             setIsError(true);
@@ -91,7 +91,6 @@ export default function RolesManagement() {
                 const response = await api.get('/roles');
                 setRoles(response.data);
                 setSelectedRole(response.data[0].role);
-                setSelectedTable(response.data[0].tables[0]);
             } catch (error) {
                 console.error('Failed to fetch roles:', error);
             } finally {
@@ -223,7 +222,10 @@ export default function RolesManagement() {
                             {roles.map((role) => (
                                 <button
                                     key={role.role}
-                                    onClick={() => setSelectedRole(role.role)}
+                                    onClick={() => {
+                                        setSelectedRole(role.role);
+                                        setSelectedTable({ name: '', privileges: [] });
+                                    }}
                                     className={`w-full text-left p-4 rounded-lg transition-all duration-200 ${selectedRole === role.role
                                         ? 'bg-sky-500/20  border border-sky-500/30 text-white'
                                         : 'text-slate-300 hover:bg-black border border-slate-700 hover:border-slate-600 hover:text-white'
@@ -334,7 +336,7 @@ export default function RolesManagement() {
                             <Blocker />
                         )
                     }
-                    {(selectedRole && selectedTable) ? (
+                    {(selectedRole && selectedTable?.name !== '') ? (
                         <div className="space-y-6">
                             {/* Permissions */}
                             <div className="bg-black border border-slate-700 rounded-xl">
@@ -359,10 +361,7 @@ export default function RolesManagement() {
                                     />) : (<div className="p-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {allPrivileges.sort().map((privilege) => {
-                                                console.log("selectedTable?.privileges", selectedTable?.privileges);
-                                                console.log("privilege", privilege);
                                                 const isAccessible = selectedTable?.privileges.includes(privilege);
-                                                console.log(privilege, isAccessible);
                                                 return (
                                                     <div
                                                         key={privilege}

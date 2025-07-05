@@ -2,3 +2,6 @@
 *.csv
 .sh
 *.sh
+.env
+*.env
+/node_modules
