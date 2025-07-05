@@ -11,6 +11,7 @@ import Backup from '@/components/Backup';
 import Console from '@/components/Console';
 import { Menu } from '@headlessui/react';
 import { useRouter } from 'next/navigation';
+import api from '@/config/api';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -36,6 +37,16 @@ export default function App() {
     setCurrentSection(section);
     setSidebarOpen(false); // Close sidebar on mobile after selection
   };
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+      localStorage.removeItem('user');
+      router.push('/auth');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  }
 
   const renderContent = () => {
     switch (currentSection) {
@@ -103,10 +114,7 @@ export default function App() {
                       <button
                         className={`${active ? 'bg-slate-800' : ''
                           } text-red-500 group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                        onClick={() => {
-                          localStorage.removeItem('user');
-                          router.push('/auth');
-                        }}
+                        onClick={handleLogout}
                       >
                         Log Out
                       </button>

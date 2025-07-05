@@ -9,7 +9,9 @@ export const POST = async (req: NextRequest) => {
   const { username, password } = await req.json();
 
   const poolCheck = new Pool({
-    connectionString: `postgres://${username}:${password}@localhost:5432/movie_theater_big`,
+    connectionString: `postgres://${username}:${password}@${
+      process.env.LOCALHOST_PORT || process.env.HOST || "localhost:5432"
+    }/${process.env.DATABASE_NAME || "movie_theater_big"}`,
   });
   try {
     await poolCheck.connect();
