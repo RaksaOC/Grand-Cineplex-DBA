@@ -1,248 +1,255 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, Database, FileText, Copy, Check, Trash } from 'lucide-react';
+import { Download, Database, FileText, Copy, Check, Trash, AlertTriangle } from 'lucide-react';
 import dotenv from 'dotenv';
+import JSZip from 'jszip';
+import {
+    BACKUP_SCRIPT,
+    RECOVERY_SCRIPT,
+    ENV_TEMPLATE,
+    README_CONTENT,
+    INSTRUCTIONS,
+    FILE_STRUCTURE,
+    FILE_STRUCTURE_NOTE
+} from '@/utils/data';
 
 export default function Backup() {
     dotenv.config();
     const [isGenerating, setIsGenerating] = useState(false);
-    const [generatedScript, setGeneratedScript] = useState('');
-    const [copied, setCopied] = useState(false);
+    const [backupScript, setBackupScript] = useState('');
+    const [recoveryScript, setRecoveryScript] = useState('');
+    const [copiedBackup, setCopiedBackup] = useState(false);
+    const [copiedRecovery, setCopiedRecovery] = useState(false);
 
-    const generateBackupScript = async () => {
+    const generateScripts = async () => {
         setIsGenerating(true);
 
-        const script = `#!/usr/bin/env python3
-"""
-Railway Database Backup Script
-Generated on ${new Date().toLocaleDateString()}
-This script will create a full backup of your Railway PostgreSQL database.
-"""
+        const backupContent = BACKUP_SCRIPT;
+        const recoveryContent = RECOVERY_SCRIPT;
 
-import os
-import subprocess
-import sys
-from datetime import datetime
+        // Simulate typing effect for both scripts simultaneously
+        setBackupScript('');
+        setRecoveryScript('');
+        const maxLength = Math.max(backupContent.length, recoveryContent.length);
 
-def main():
-    # Railway database connection (replace with your actual connection details)
-    DATABASE_URL = ${process.env.DATABASE_URL}
-    
-    # Generate timestamp for unique filename
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    backup_filename = f"railway_backup_{timestamp}.sql"
-    
-    print("🚀 Starting Railway database backup...")
-    print(f"📁 Backup file: {backup_filename}")
-    print(f"⏰ Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("-" * 50)
-    
-    try:
-        # Build pg_dump command for full backup
-        cmd = [
-            'pg_dump',
-            DATABASE_URL,
-            '-f', backup_filename,
-            '--verbose',
-            '--no-password',
-            '--clean',
-            '--if-exists'
-        ]
-        
-        print("🔧 Running pg_dump command...")
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        if result.returncode == 0:
-            print("✅ Backup completed successfully!")
-            print(f"📄 File saved as: {backup_filename}")
-            print(f"📊 File size: {os.path.getsize(backup_filename)} bytes")
-        else:
-            print("❌ Backup failed!")
-            print("Error:", result.stderr)
-            sys.exit(1)
-            
-    except FileNotFoundError:
-        print("❌ pg_dump not found!")
-        print("💡 Please install PostgreSQL client tools:")
-        print("   macOS: brew install postgresql")
-        print("   Ubuntu: sudo apt-get install postgresql-client")
-        print("   Windows: Download from https://www.postgresql.org/download/")
-        sys.exit(1)
-    except Exception as e:
-        print(f"❌ Unexpected error: {e}")
-        sys.exit(1)
-
-if __name__ == "__main__":
-    main()`;
-
-        // Simulate typing effect
-        setGeneratedScript('');
-        for (let i = 0; i < script.length; i++) {
-            await new Promise(resolve => setTimeout(resolve, 5));
-            setGeneratedScript(script.substring(0, i + 1));
+        for (let i = 0; i < maxLength; i++) {
+            await new Promise(resolve => setTimeout(resolve, 0.001)); // Faster typing
+            if (i < backupContent.length) {
+                setBackupScript(backupContent.substring(0, i + 1));
+            }
+            if (i < recoveryContent.length) {
+                setRecoveryScript(recoveryContent.substring(0, i + 1));
+            }
         }
 
         setIsGenerating(false);
     };
 
-    const downloadScript = () => {
-        if (!generatedScript) return;
-
-        const blob = new Blob([generatedScript], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `railway_backup_script_${new Date().toISOString().split('T')[0]}.py`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
-
-    const copyToClipboard = async () => {
-        if (!generatedScript) return;
+    const downloadScripts = async () => {
+        if (!backupScript || !recoveryScript) return;
 
         try {
-            await navigator.clipboard.writeText(generatedScript);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
+            // Create a new zip file
+            const zip = new JSZip();
+
+            // Create backup directory (empty folder)
+            zip.folder('backup');
+
+            // Add Python scripts
+            zip.file('backup.py', backupScript);
+            zip.file('recovery.py', recoveryScript);
+
+            // Create .env.example and .env as separate text files
+            const envContent = Object.entries(ENV_TEMPLATE)
+                .map(([key, value]) => `${key}="${value}"`)
+                .join('\n');
+            zip.file('.env.example', envContent);
+            zip.file('.env', "");
+
+            // Add README
+            zip.file('README.md', README_CONTENT);
+
+            // Generate the zip file with maximum compression
+            const content = await zip.generateAsync({
+                type: 'blob',
+                compression: 'DEFLATE',
+                compressionOptions: { level: 9 }
+            });
+
+            // Create download link and trigger download
+            const url = URL.createObjectURL(content);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'backup-recovery-scripts.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Failed to create zip file:', err);
+        }
+    };
+
+    const copyToClipboard = async (script: string, isBackup: boolean) => {
+        if (!script) return;
+
+        try {
+            await navigator.clipboard.writeText(script);
+            if (isBackup) {
+                setCopiedBackup(true);
+                setTimeout(() => setCopiedBackup(false), 2000);
+            } else {
+                setCopiedRecovery(true);
+                setTimeout(() => setCopiedRecovery(false), 2000);
+            }
         } catch (err) {
             console.error('Failed to copy:', err);
         }
     };
 
-    const clearScript = () => {
-        setGeneratedScript('');
+    const clearScripts = () => {
+        setBackupScript('');
+        setRecoveryScript('');
     };
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-white">Database Backup</h1>
-                <p className="text-slate-400 mt-1">Generate backup scripts for your Railway PostgreSQL database</p>
+                <h1 className="text-2xl font-bold text-white">Database Backup & Recovery</h1>
+                <p className="text-slate-400 mt-1">Generate backup and recovery scripts for your PostgreSQL database</p>
             </div>
 
-            {/* Instructions */}
-            <div className="bg-black border border-slate-700 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">How to Use</h3>
-                <div className="space-y-3 text-sm text-slate-400">
-                    <div className="flex items-start space-x-3">
-                        <span className="bg-sky-500/20 text-sky-400 px-2 py-1 rounded text-xs font-medium">1</span>
-                        <p>Click &quot;Generate Backup Script&quot; to create a Python backup script</p>
+            {/* Instructions and File Structure Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Instructions */}
+                <div className="bg-black border border-slate-700 rounded-xl p-6 overflow-x-auto">
+                    <h3 className="text-lg font-semibold text-white mb-4">How to Use</h3>
+                    <div className="space-y-3 text-sm text-slate-400">
+                        {INSTRUCTIONS.map(({ step, text, code, warning }) => (
+                            <div key={step} className="flex items-start space-x-3">
+                                <span className="bg-sky-500/20 text-sky-400 px-2 py-1 rounded text-xs font-medium">{step}</span>
+                                <div>
+                                    <p>{text}</p>
+                                    {code && (
+                                        <div className="mt-2 font-mono text-xs bg-slate-800/50 p-3 rounded text-wrap whitespace-pre-line">
+                                            {code}
+                                        </div>
+                                    )}
+                                    {warning && (
+                                        <p className="mt-2 text-yellow-500/80 flex items-center gap-2">
+                                            <AlertTriangle className="w-4 h-4" />
+                                            {warning}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                    <div className="flex items-start space-x-3">
-                        <span className="bg-sky-500/20 text-sky-400 px-2 py-1 rounded text-xs font-medium">2</span>
-                        <p>Download the script and save it to your local machine</p>
+                </div>
+
+                {/* File Structure */}
+                <div className="bg-black border border-slate-700 rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">File Structure</h3>
+                    <div className="font-mono text-sm text-slate-400 whitespace-pre rounded bg-slate-800/50 p-4">
+                        {FILE_STRUCTURE}
                     </div>
-                    <div className="flex items-start space-x-3">
-                        <span className="bg-sky-500/20 text-sky-400 px-2 py-1 rounded text-xs font-medium">3</span>
-                        <p>Replace the DATABASE_URL in the script with your Railway connection string</p>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                        <span className="bg-sky-500/20 text-sky-400 px-2 py-1 rounded text-xs font-medium">4</span>
-                        <p>Run the script</p>
-                    </div>
+                    <p className="text-xs text-slate-500 mt-3">{FILE_STRUCTURE_NOTE}</p>
                 </div>
             </div>
 
-            {/* Backup Configuration */}
-            <div className="bg-black border border-slate-700 rounded-xl p-6">
+            {/* Scripts Section */}
+            <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">Scripts</h3>
                 <button
-                    onClick={generateBackupScript}
+                    onClick={generateScripts}
                     disabled={isGenerating}
-                    className="w-full bg-sky-500/20 border border-sky-500/30 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-sky-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                    className="bg-sky-500/20 border border-sky-500/30 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-sky-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
                     {isGenerating ? (
                         <>
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            <span>Generating Script...</span>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <span>Generating...</span>
                         </>
                     ) : (
                         <>
-                            <FileText className="w-5 h-5" />
-                            <span>Generate Backup Script</span>
+                            <FileText className="w-4 h-4" />
+                            <span>Generate Scripts</span>
                         </>
                     )}
                 </button>
-
-                {/* <div className="space-y-4"> */}
-                {/* <div className="flex items-center space-x-3 p-4 bg-slate-800/50 border border-slate-600 rounded-lg">
-                        <div className="w-4 h-4 bg-sky-500 rounded-full flex items-center justify-center">
-                            <Check className="w-3 h-3 text-white" />
-                        </div>
-                        <div>
-                            <h3 className="font-medium text-white">Full Database Backup</h3>
-                            <p className="text-sm text-slate-400">Complete backup including schema, data, indexes, and constraints</p>
-                        </div>
-                    </div> */}
-
-                {/* <button
-                        onClick={generateBackupScript}
-                        disabled={isGenerating}
-                        className="w-full bg-sky-500/20 border border-sky-500/30 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-sky-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                    >
-                        {isGenerating ? (
-                            <>
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                <span>Generating Script...</span>
-                            </>
-                        ) : (
-                            <>
-                                <FileText className="w-5 h-5" />
-                                <span>Generate Backup Script</span>
-                            </>
-                        )}
-                    </button> */}
-                {/* </div> */}
             </div>
 
-
-
-            {/* Generated Script */}
-            {generatedScript && (
-                <div className="bg-black border border-slate-700 rounded-xl overflow-hidden">
-                    <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                        <div className="flex items-center space-x-2">
-                            <FileText className="w-5 h-5 text-sky-400" />
-                            <h3 className="font-semibold text-white">Generated Backup Script</h3>
-                        </div>
-                        <div className="flex items-center space-x-2">
+            {/* Generated Scripts */}
+            {(backupScript || recoveryScript) && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Backup Script */}
+                    <div className="bg-black border border-slate-700 rounded-xl overflow-hidden">
+                        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                            <div className="flex items-center space-x-2">
+                                <Database className="w-5 h-5 text-sky-400" />
+                                <h3 className="font-semibold text-white">Backup Script</h3>
+                            </div>
                             <button
-                                onClick={copyToClipboard}
+                                onClick={() => copyToClipboard(backupScript, true)}
                                 className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
                                 title="Copy to clipboard"
-                                disabled={isGenerating}
                             >
-                                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                            </button>
-                            <button
-                                onClick={clearScript}
-                                className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
-                                title="Clear Script"
-                                disabled={isGenerating}
-                            >
-                                <Trash className="w-4 h-4" />
-                            </button>
-                            <button
-                                onClick={downloadScript}
-                                className="bg-sky-500/20 border border-sky-500/30 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-sky-500/30 flex items-center space-x-2"
-                            >
-                                <Download className="w-4 h-4" />
-                                <span>Download</span>
+                                {copiedBackup ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                             </button>
                         </div>
+                        <div className="p-4 max-h-[1000px] overflow-auto">
+                            <pre className="text-sm text-slate-300 whitespace-pre-wrap">
+                                {backupScript}
+                            </pre>
+                        </div>
                     </div>
-                    <div className="p-4">
-                        <pre className="text-sm text-slate-300  overflow-x-auto whitespace-pre-wrap">
-                            {generatedScript}
-                        </pre>
+
+                    {/* Recovery Script */}
+                    <div className="bg-black border border-slate-700 rounded-xl overflow-hidden">
+                        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                            <div className="flex items-center space-x-2">
+                                <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                                <h3 className="font-semibold text-white">Recovery Script</h3>
+                            </div>
+                            <button
+                                onClick={() => copyToClipboard(recoveryScript, false)}
+                                className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
+                                title="Copy to clipboard"
+                            >
+                                {copiedRecovery ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                        </div>
+                        <div className="p-4 max-h-[1000px] overflow-auto">
+                            <pre className="text-sm text-slate-300 whitespace-pre-wrap">
+                                {recoveryScript}
+                            </pre>
+                        </div>
                     </div>
                 </div>
             )}
 
-
+            {/* Action Buttons */}
+            {(backupScript || recoveryScript) && (
+                <div className="flex justify-end space-x-4">
+                    <button
+                        onClick={clearScripts}
+                        disabled={isGenerating}
+                        className={`px-4 py-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors flex items-center space-x-2 ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        <Trash className="w-4 h-4" />
+                        <span>Clear</span>
+                    </button>
+                    <button
+                        onClick={downloadScripts}
+                        className="bg-sky-500/20 border border-sky-500/30 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-sky-500/30 flex items-center space-x-2"
+                    >
+                        <Download className="w-4 h-4" />
+                        <span>Download</span>
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
