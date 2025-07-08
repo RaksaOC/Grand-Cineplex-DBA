@@ -247,7 +247,8 @@ export default function Backup() {
                     </button>
                     <button
                         onClick={downloadScripts}
-                        className="bg-sky-500/20 border border-sky-500/30 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-sky-500/30 flex items-center space-x-2"
+                        disabled={isGenerating}
+                        className={`bg-sky-500/20 border border-sky-500/30 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-sky-500/30 flex items-center space-x-2 ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         <Download className="w-4 h-4" />
                         <span>Download</span>

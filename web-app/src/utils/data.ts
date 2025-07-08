@@ -371,10 +371,10 @@ export const FILE_STRUCTURE = `.
 export const FILE_STRUCTURE_NOTE =
   "* Backup files are automatically managed based on retention settings";
 
-// ... existing code ...
 
 // Requirements content
-export const REQUIREMENTS_CONTENT = `setuptools>=69.0.3
+export const REQUIREMENTS_CONTENT = `
+setuptools>=69.0.3
 python-editor>=1.0.4
 inquirer>=3.1.4
 schedule>=1.2.1
