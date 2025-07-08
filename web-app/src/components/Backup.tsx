@@ -9,9 +9,10 @@ import {
     RECOVERY_SCRIPT,
     ENV_TEMPLATE,
     README_CONTENT,
-    INSTRUCTIONS,
     FILE_STRUCTURE,
-    FILE_STRUCTURE_NOTE
+    FILE_STRUCTURE_NOTE,
+    INSTRUCTIONS,
+    REQUIREMENTS_CONTENT
 } from '@/utils/data';
 
 export default function Backup() {
@@ -59,6 +60,9 @@ export default function Backup() {
             // Add Python scripts
             zip.file('backup.py', backupScript);
             zip.file('recovery.py', recoveryScript);
+
+            // Add requirements.txt
+            zip.file('requirements.txt', REQUIREMENTS_CONTENT);
 
             // Create .env.example and .env as separate text files
             const envContent = Object.entries(ENV_TEMPLATE)

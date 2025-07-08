@@ -354,6 +354,34 @@ export const README_CONTENT = `# Database Backup & Recovery
    python recovery.py
    \`\`\``;
 
+// File structure example
+export const FILE_STRUCTURE = `.
+├── .env
+├── .env.example
+├── backup/
+│   ├── database_20240315_120000.sql
+│   ├── database_20240315_130000.sql
+│   ├── database_20240315_140000.sql
+│   └── database_20240315_150000.sql
+├── requirements.txt
+├── backup.py
+└── recovery.py`;
+
+// File structure note
+export const FILE_STRUCTURE_NOTE =
+  "* Backup files are automatically managed based on retention settings";
+
+// ... existing code ...
+
+// Requirements content
+export const REQUIREMENTS_CONTENT = `setuptools>=69.0.3
+python-editor>=1.0.4
+inquirer>=3.1.4
+schedule>=1.2.1
+python-dotenv>=1.0.0
+faker>=22.6.0
+pandas>=2.2.0`;
+
 // Instructions steps
 export const INSTRUCTIONS = [
   {
@@ -366,44 +394,40 @@ export const INSTRUCTIONS = [
   },
   {
     step: 3,
+    text: "Create and activate Python virtual environment",
+    code: `# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate  # On macOS/Linux
+venv\\Scripts\\activate    # On Windows`,
+  },
+  {
+    step: 4,
+    text: "Install all required packages from requirements.txt",
+    code: "pip install -r requirements.txt",
+  },
+  {
+    step: 5,
     text: "Copy .env.example to .env and configure your database credentials",
     code: `DATABASE_URL="postgresql://username:password@host:port/dbname"
 DATABASE_NAME="your_database_name"`,
   },
   {
-    step: 4,
-    text: "Install required packages",
-    code: "pip install python-dotenv inquirer schedule",
-  },
-  {
-    step: 5,
+    step: 6,
     text: "Run backup script with options",
     code: `# One-time backup
 python backup.py
 
-# Scheduled backup
+# Scheduled backup (every 1 hour, keep backups for 7 days)
 python backup.py --schedule --interval 1 --retention 7`,
   },
   {
-    step: 6,
+    step: 7,
     text: "For recovery (only when needed)",
     code: "python recovery.py",
     warning: "Only use recovery when you have existing backups!",
   },
 ];
 
-// File structure example
-export const FILE_STRUCTURE = `.
-├── .env
-├── .env.example
-├── backup/
-│   ├── database_20240315_120000.sql
-│   ├── database_20240315_130000.sql
-│   ├── database_20240315_140000.sql
-│   └── database_20240315_150000.sql
-├── backup.py
-└── recovery.py`;
-
-// File structure note
-export const FILE_STRUCTURE_NOTE =
-  "* Backup files are automatically managed based on retention settings";
+// ... existing code ...
