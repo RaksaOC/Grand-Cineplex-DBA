@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "@/config/db";
 import { verifyToken } from "@/config/verifyToken";
 
-const POST = async (request: NextRequest) => {
+export const POST = async (request: NextRequest) => {
   const client = await pool.connect();
   await verifyToken(request);
 
@@ -35,7 +35,7 @@ const POST = async (request: NextRequest) => {
       splitCommand[splitCommand.length - 1] === "customers"
     ) {
       return NextResponse.json(
-        { error: "Please use limit or offset for this table" },
+        { error: "Please use LIMIT or OFFSET for this table" },
         { status: 400 }
       );
     }
