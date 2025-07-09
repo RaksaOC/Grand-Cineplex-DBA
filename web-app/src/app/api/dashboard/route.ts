@@ -21,7 +21,7 @@ export const GET = async (req: NextRequest) => {
   };
   try {
     const numOfUsers = await client.query(
-      `SELECT COUNT(*) FROM ${tables.roles.pg_user}`
+      `SELECT COUNT(*) FROM ${tables.roles.pg_user} WHERE  usename != 'michael' AND usename != 'emily' AND usename != 'john' AND usename != 'donald' AND usename != 'maria' AND usename != 'jessica' AND usename != 'henry' AND usename != 'gemma' AND usename != 'jerry'`
     );
     const numOfRoles = await client.query(
       `SELECT COUNT(*) FROM ${tables.roles.pg_roles}`

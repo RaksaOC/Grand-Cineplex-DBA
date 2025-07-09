@@ -46,8 +46,14 @@ export default function RolesManagement() {
             await api.patch('/roles', { oldRole: selectedRole, newRole: role });
             setIsEditRoleModalOpen(false);
             setRefresh(!refresh);
-        } catch (error) {
-            console.error('Failed to edit role:', error);
+        } catch (error: any) {
+            setIsError(true);
+            // Check if error response exists and has data
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.error);
+            } else {
+                setErrorMessage('Failed to edit role. Please try again.');
+            }
         }
     };
 
@@ -72,7 +78,12 @@ export default function RolesManagement() {
                 const response = await api.get('/tables');
                 setAllTables(response.data);
             } catch (error) {
-                console.error('Failed to fetch tables:', error);
+                setIsError(true);
+                if (error.response && error.response.data) {
+                    setErrorMessage(error.response.data.error);
+                } else {
+                    setErrorMessage('Failed to fetch tables. Please try again.');
+                }
             }
         };
         const fetchPrivileges = async () => {
@@ -80,7 +91,12 @@ export default function RolesManagement() {
                 const response = await api.get('/privileges');
                 setAllPrivileges(response.data);
             } catch (error) {
-                console.error('Failed to fetch privileges:', error);
+                setIsError(true);
+                if (error.response && error.response.data) {
+                    setErrorMessage(error.response.data.error);
+                } else {
+                    setErrorMessage('Failed to fetch privileges. Please try again.');
+                }
             }
         };
         fetchTables();
@@ -92,7 +108,12 @@ export default function RolesManagement() {
                 setRoles(response.data);
                 setSelectedRole(response.data[0].role);
             } catch (error) {
-                console.error('Failed to fetch roles:', error);
+                setIsError(true);
+                if (error.response && error.response.data) {
+                    setErrorMessage(error.response.data.error);
+                } else {
+                    setErrorMessage('Failed to fetch roles. Please try again.');
+                }
             } finally {
                 setIsLoading(false);
             }

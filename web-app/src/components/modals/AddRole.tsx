@@ -8,6 +8,7 @@ import { Table } from '@/types/Schema';
 import { getPrivDescription } from '@/utils/getInfo';
 import { TablePrivileges } from '@/types/RolesData';
 import api from '@/config/api';
+import Error from './Error';
 
 interface AddRoleProps {
     isOpen: boolean;
@@ -21,7 +22,8 @@ export const AddRole = ({ isOpen, onClose, onSuccess }: AddRoleProps) => {
     const [selectedTable, setSelectedTable] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [privileges, setPrivileges] = useState<string[]>([]);
     const [tables, setTables] = useState<string[]>([]);
 
@@ -32,9 +34,14 @@ export const AddRole = ({ isOpen, onClose, onSuccess }: AddRoleProps) => {
             try {
                 const response = await api.get('/privileges');
                 setPrivileges(response.data);
-            } catch (error) {
-                console.error('Failed to fetch privileges:', error);
                 setIsLoading(false);
+            } catch (error) {
+                setIsError(true);
+                if (error.response && error.response.data) {
+                    setErrorMessage(error.response.data.error);
+                } else {
+                    setErrorMessage('Failed to fetch privileges. Please try again.');
+                }
             }
         }
         const fetchTables = async () => {
@@ -47,12 +54,17 @@ export const AddRole = ({ isOpen, onClose, onSuccess }: AddRoleProps) => {
                         privileges: []
                     }
                 }));
-
                 setData(newData);
                 setSelectedTable([newData[0].name]);
                 setIsLoading(false);
             } catch (error) {
-                console.error('Failed to fetch tables:', error);
+                setIsError(true);
+                if (error.response && error.response.data) {
+                    setErrorMessage(error.response.data.error);
+                } else {
+                    setErrorMessage('Failed to fetch tables. Please try again.');
+                }
+            } finally {
                 setIsLoading(false);
             }
         }
@@ -305,6 +317,7 @@ export const AddRole = ({ isOpen, onClose, onSuccess }: AddRoleProps) => {
                     </div>
                 </div>
             </Dialog>
+            <Error isOpen={isError} onClose={() => setIsError(false)} message={errorMessage} />
         </Transition>
     );
 };

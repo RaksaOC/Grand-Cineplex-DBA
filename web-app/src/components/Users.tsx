@@ -26,6 +26,7 @@ export default function Users() {
             await api.delete(`/users/${currentUsername}`);
             setIsDeleteUserModalOpen(false);
             setRefresh(!refresh);
+            setIsLoading(false);
         } catch (error) {
             setIsError(true);
             // Check if error response exists and has data
@@ -34,7 +35,8 @@ export default function Users() {
             } else {
                 setErrorMessage('Failed to delete user. Please try again.');
             }
-            console.error('Failed to delete user:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -43,6 +45,15 @@ export default function Users() {
             try {
                 const response = await api.get('/users');
                 setUsers(response.data);
+                setIsLoading(false);
+            } catch (error) {
+                setIsError(true);
+                // Check if error response exists and has data
+                if (error.response && error.response.data) {
+                    setErrorMessage(error.response.data.error);
+                } else {
+                    setErrorMessage('Failed to fetch users. Please try again.');
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -111,7 +122,11 @@ export default function Users() {
                     <h1 className="text-2xl font-bold text-white">Database Users</h1>
                     <p className="text-slate-400 mt-1">Manage user accounts and permissions</p>
                 </div>
-                <button onClick={() => setIsAddUserModalOpen(true)} className="bg-sky-500/20  border border-sky-500/30 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2">
+                <button onClick={() => {
+                    setIsAddUserModalOpen(true);
+                    setIsError(false);
+                    setErrorMessage('');
+                }} className="bg-sky-500/20  border border-sky-500/30 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2">
                     <Plus className="w-5 h-5" />
                     <span>Add User</span>
                 </button>
@@ -207,7 +222,7 @@ export default function Users() {
                 </div>
                 <DeleteConfirm isOpen={isDeleteUserModalOpen} onClose={() => setIsDeleteUserModalOpen(false)} onConfirm={handleDeleteUser} title="Delete User" message="Are you sure you want to delete this user?" />
             </div>
-            <AddUser isOpen={isAddUserModalOpen} onClose={() => setIsAddUserModalOpen(false)} />
+            <AddUser isOpen={isAddUserModalOpen} onClose={() => setIsAddUserModalOpen(false)} onSuccess={() => setRefresh(!refresh)} />
             <EditUser isOpen={isEditUserModalOpen} onClose={() => setIsEditUserModalOpen(false)} currentUsername={currentUsername} onSuccess={() => setRefresh(!refresh)} />
             <Error isOpen={isError} onClose={() => setIsError(false)} message={errorMessage} />
         </div>

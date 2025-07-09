@@ -2,6 +2,7 @@ import api from "@/config/api";
 import { TablePrivileges } from "@/types/RolesData";
 import { Check, Save } from "lucide-react";
 import { useState } from "react";
+import Error from "./modals/Error";
 
 interface Table {
     name: string;
@@ -49,6 +50,8 @@ export default function EditTable({ allTables, accessibleTables, selectedRole, o
     const [selectedTables, setSelectedTables] = useState<Set<string>>(
         new Set(accessibleTables.map(table => table.name))
     );
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleToggle = (tableName: string, isAccessible: boolean) => {
         const newSelectedTables = new Set(selectedTables);
@@ -66,8 +69,14 @@ export default function EditTable({ allTables, accessibleTables, selectedRole, o
                 updatedTables: Array.from(selectedTables)
             });
             onSuccess();
-        } catch (error) {
-            console.error("Error saving tables:", error);
+        } catch (error: any) {
+            setIsError(true);
+            // Check if error response exists and has data
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.error);
+            } else {
+                setErrorMessage('Failed to save tables. Please try again.');
+            }
         }
     }
 
@@ -96,7 +105,7 @@ export default function EditTable({ allTables, accessibleTables, selectedRole, o
                     <Save className="w-5 h-5" /> Save
                 </button>
             </div>
-
+            <Error isOpen={isError} onClose={() => setIsError(false)} message={errorMessage} />
         </div>
     );
 }

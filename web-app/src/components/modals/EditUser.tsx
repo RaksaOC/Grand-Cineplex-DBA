@@ -1,9 +1,12 @@
 'use client';
 
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Listbox, Transition } from '@headlessui/react';
 import { Fragment, useState, useEffect } from 'react';
-import { X, Shield, Lock, XCircle } from 'lucide-react';
+import { X, Shield, Lock, XCircle, Check, ChevronsUpDown } from 'lucide-react';
 import axios from 'axios';
+import Error from './Error';
+import api from '@/config/api';
+import { RolesData } from '@/types/RolesData';
 
 interface EditUserProps {
     isOpen: boolean;
@@ -17,29 +20,69 @@ export const EditUser = ({ isOpen, onClose, currentUsername, onSuccess }: EditUs
     const [isLoading, setIsLoading] = useState(false);
     const [showPasswordEdit, setShowPasswordEdit] = useState(false);
     const [password, setPassword] = useState('');
+    const [roles, setRoles] = useState<string[]>([]);
+    const [selectedRole, setSelectedRole] = useState<string>('');
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         if (isOpen && currentUsername) {
             setUserName(currentUsername);
             setShowPasswordEdit(false);
             setPassword('');
+
+            // Fetch the user's current role
+            const fetchUserRole = async () => {
+                try {
+                    const response = await api.get(`/users/${currentUsername}/role`);
+                    setSelectedRole(response.data.role);
+                } catch (error) {
+                    console.error('Failed to fetch user role:', error);
+                }
+            };
+            fetchUserRole();
         }
     }, [isOpen, currentUsername]);
 
+    useEffect(() => {
+        const fetchRoles = async () => {
+            try {
+                const response = await api.get('/roles');
+                const data = response.data.map((role: RolesData) => role.role);
+                setRoles(data);
+            } catch (error) {
+                setIsError(true);
+                if (error.response && error.response.data) {
+                    setErrorMessage(error.response.data.error);
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchRoles();
+    }, [isOpen]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!userName.trim() || (userName.trim() === currentUsername && !password)) return;
+        if (!userName.trim() || (userName.trim() === currentUsername && !password && !selectedRole)) return;
 
         setIsLoading(true);
         try {
             await axios.patch(`/api/users/${currentUsername}`, {
                 username: userName.trim(),
-                password: password || ""
+                password: password || "",
+                role: selectedRole || ""
             });
             onClose();
             onSuccess();
         } catch (error) {
-            console.error('Failed to update user:', error);
+            setIsError(true);
+            // Check if error response exists and has data
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.error);
+            } else {
+                setErrorMessage('Failed to update user. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -152,6 +195,59 @@ export const EditUser = ({ isOpen, onClose, currentUsername, onSuccess }: EditUs
                                         )}
                                     </div>
 
+                                    {/* Role Selection */}
+                                    <div className="space-y-4">
+                                        <label htmlFor="role" className="block text-sm font-medium text-slate-300">
+                                            Role
+                                        </label>
+                                        <div className="relative">
+                                            <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                            <Listbox value={selectedRole} onChange={setSelectedRole}>
+                                                <div className="relative">
+                                                    <Listbox.Button className="relative w-full pl-10 pr-10 py-3 bg-black border border-slate-600 rounded-lg text-left focus:outline-none focus:border-sky-500 transition-colors">
+                                                        <span className={`block truncate ${selectedRole ? 'text-white' : 'text-slate-400'}`}>
+                                                            {selectedRole || 'Select a role'}
+                                                        </span>
+                                                        <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                            <ChevronsUpDown className="h-5 w-5 text-slate-400" aria-hidden="true" />
+                                                        </span>
+                                                    </Listbox.Button>
+                                                    <Transition
+                                                        as={Fragment}
+                                                        leave="transition ease-in duration-100"
+                                                        leaveFrom="opacity-100"
+                                                        leaveTo="opacity-0"
+                                                    >
+                                                        <Listbox.Options className="absolute z-10 mt-1 w-full bg-black border border-slate-700 rounded-lg py-1 text-base shadow-lg focus:outline-none">
+                                                            {roles.map((role) => (
+                                                                <Listbox.Option
+                                                                    key={role}
+                                                                    value={role}
+                                                                    className={({ active }) =>
+                                                                        `relative cursor-pointer select-none py-2 pl-10 pr-4 ${active ? 'bg-sky-500/10 text-sky-400' : 'text-slate-400'}`
+                                                                    }
+                                                                >
+                                                                    {({ selected, active }) => (
+                                                                        <>
+                                                                            <span className={`block truncate ${selected ? 'font-medium text-sky-400' : ''}`}>
+                                                                                {role}
+                                                                            </span>
+                                                                            {selected ? (
+                                                                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sky-400">
+                                                                                    <Check className="h-5 w-5" aria-hidden="true" />
+                                                                                </span>
+                                                                            ) : null}
+                                                                        </>
+                                                                    )}
+                                                                </Listbox.Option>
+                                                            ))}
+                                                        </Listbox.Options>
+                                                    </Transition>
+                                                </div>
+                                            </Listbox>
+                                        </div>
+                                    </div>
+
                                     {/* Actions */}
                                     <div className="flex items-center justify-end space-x-3 pt-4">
                                         <button
@@ -163,7 +259,7 @@ export const EditUser = ({ isOpen, onClose, currentUsername, onSuccess }: EditUs
                                         </button>
                                         <button
                                             type="submit"
-                                            disabled={isLoading || (!userName.trim() || (userName.trim() === currentUsername && !password))}
+                                            disabled={isLoading || (!userName.trim() || (userName.trim() === currentUsername && !password && !selectedRole))}
                                             className="px-6 py-2 bg-sky-500/20 border border-sky-500/30 text-white rounded-lg font-medium transition-all duration-200 hover:bg-sky-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                                         >
                                             {isLoading ? (
@@ -182,6 +278,7 @@ export const EditUser = ({ isOpen, onClose, currentUsername, onSuccess }: EditUs
                     </div>
                 </div>
             </Dialog>
+            <Error isOpen={isError} onClose={() => setIsError(false)} message={errorMessage} />
         </Transition>
     );
 };

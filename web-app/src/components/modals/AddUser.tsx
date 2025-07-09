@@ -7,29 +7,39 @@ import { Role } from '@/types/Roles';
 import axios from 'axios';
 import { RolesData } from '@/types/RolesData';
 import api from '@/config/api';
+import Error from './Error';
 
 interface AddUserProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess: () => void;
 }
 
-export const AddUser = ({ isOpen, onClose }: AddUserProps) => {
+export const AddUser = ({ isOpen, onClose, onSuccess }: AddUserProps) => {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [selectedRole, setSelectedRole] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const [roles, setRoles] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchRoles = async () => {
-            const response = await api.get('/roles');
-
-            // should get roles in an array like ["postgres", "admin", "user"]
-            const data = response.data.map((role: RolesData) => role.role);
-            console.log(data);
-            setRoles(data);
+            try {
+                const response = await api.get('/roles');
+                const data = response.data.map((role: RolesData) => role.role);
+                setRoles(data);
+            } catch (error) {
+                setIsError(true);
+                if (error.response && error.response.data) {
+                    setErrorMessage(error.response.data.error);
+                } else {
+                    setErrorMessage('Failed to fetch roles. Please try again.');
+                }
+            }
         }
         fetchRoles();
     }, []);
@@ -48,9 +58,16 @@ export const AddUser = ({ isOpen, onClose }: AddUserProps) => {
             setUsername('');
             setPassword('');
             setSelectedRole(null);
+            onSuccess();
             onClose();
         } catch (error) {
-            console.error('Failed to add user:', error);
+            setIsError(true);
+            // Check if error response exists and has data
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.error);
+            } else {
+                setErrorMessage('Failed to add user. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -240,6 +257,7 @@ export const AddUser = ({ isOpen, onClose }: AddUserProps) => {
                     </div>
                 </div>
             </Dialog>
+            <Error isOpen={isError} onClose={() => setIsError(false)} message={errorMessage} />
         </Transition>
     );
 };

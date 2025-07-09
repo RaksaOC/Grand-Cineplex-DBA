@@ -3,6 +3,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useState, useEffect } from 'react';
 import { X, Shield } from 'lucide-react';
+import Error from './Error';
 
 interface EditRoleProps {
     isOpen: boolean;
@@ -17,7 +18,8 @@ interface EditRoleProps {
 export const EditRole = ({ isOpen, onClose, onSubmit, currentRole }: EditRoleProps) => {
     const [roleName, setRoleName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     useEffect(() => {
         if (isOpen && currentRole) {
             setRoleName(currentRole.name);
@@ -33,7 +35,13 @@ export const EditRole = ({ isOpen, onClose, onSubmit, currentRole }: EditRolePro
             await onSubmit(roleName.trim());
             onClose();
         } catch (error) {
-            console.error('Failed to update role:', error);
+            setIsError(true);
+            // Check if error response exists and has data
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.error);
+            } else {
+                setErrorMessage('Failed to update role. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -130,6 +138,7 @@ export const EditRole = ({ isOpen, onClose, onSubmit, currentRole }: EditRolePro
                     </div>
                 </div>
             </Dialog>
+            <Error isOpen={isError} onClose={() => setIsError(false)} message={errorMessage} />
         </Transition>
     );
 };

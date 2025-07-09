@@ -3,6 +3,7 @@ import { TablePrivileges } from "@/types/RolesData";
 import { getPrivDescription } from "@/utils/getInfo";
 import { Check, Save } from "lucide-react";
 import { useState } from "react";
+import Error from "./modals/Error";
 
 interface EditPrivilegesProps {
     allPrivileges: string[];
@@ -14,6 +15,7 @@ interface EditPrivilegesProps {
 
 const PrivilegeCard = (privilege: string, isAccessible: boolean, onToggle: (privilege: string, isAccessible: boolean) => void) => {
     const [isToggled, setIsToggled] = useState<boolean>(isAccessible);
+
     return (
         <div className={`p-4 rounded-lg bg-black border border-slate-600 transition-all duration-200 cursor-pointer ${isToggled
             ? 'bg-sky-500/10 text-sky-400'
@@ -37,14 +39,23 @@ const PrivilegeCard = (privilege: string, isAccessible: boolean, onToggle: (priv
 
 export default function EditPrivileges({ allPrivileges, accessiblePrivileges, selectedTable, selectedRole, onSuccess }: EditPrivilegesProps) {
     const [selectedPrivileges, setSelectedPrivileges] = useState<Set<string>>(new Set(accessiblePrivileges));
-
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const handleSave = async () => {
-        const response = await api.patch(`/roles/${selectedRole}/privileges`, {
-            table: selectedTable.name,
-            updatedPrivileges: Array.from(selectedPrivileges)
-        });
-        if (response.status === 200) {
+        try {
+            await api.patch(`/roles/${selectedRole}/privileges`, {
+                table: selectedTable.name,
+                updatedPrivileges: Array.from(selectedPrivileges)
+            });
             onSuccess();
+        } catch (error: any) {
+            setIsError(true);
+            // Check if error response exists and has data
+            if (error.response && error.response.data) {
+                setErrorMessage(error.response.data.error);
+            } else {
+                setErrorMessage('Failed to save privileges. Please try again.');
+            }
         }
     }
 
@@ -76,6 +87,7 @@ export default function EditPrivileges({ allPrivileges, accessiblePrivileges, se
                     <Save className="w-5 h-5" /> Save
                 </button>
             </div>
+            <Error isOpen={isError} onClose={() => setIsError(false)} message={errorMessage} />
         </div>
     );
 }
