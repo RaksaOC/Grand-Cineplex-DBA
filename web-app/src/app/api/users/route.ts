@@ -45,7 +45,17 @@ export const POST = async (request: NextRequest) => {
   const client = await pool.connect();
   const body = await request.json();
   const { username, password, role } = body;
-  if (username === "michael" || username === "emily" || username === "john" || username === "donald" || username === "maria" || username === "jessica" || username === "henry" || username === "gemma" || username === "jerry") {
+  if (
+    username === "michael" ||
+    username === "emily" ||
+    username === "john" ||
+    username === "donald" ||
+    username === "maria" ||
+    username === "jessica" ||
+    username === "henry" ||
+    username === "gemma" ||
+    username === "jerry"
+  ) {
     return NextResponse.json(
       { error: "Cannot create user with these credentials" },
       { status: 400 }
@@ -53,12 +63,14 @@ export const POST = async (request: NextRequest) => {
   }
   try {
     await client.query(`CREATE USER ${username} WITH PASSWORD '${password}'`);
-    await client.query(`GRANT ${role} TO ${username}`);
+    if (role) {
+      await client.query(`GRANT ${role} TO ${username}`);
+    }
     return NextResponse.json({ message: "User created successfully" });
   } catch (error: any) {
     console.error(error.message);
     return NextResponse.json(
-      { error: "Failed to create user" },
+      { error: "Failed to create user" + error },
       { status: 500 }
     );
   } finally {
